@@ -1,0 +1,46 @@
+{
+  "name": "node-bonsai",
+  "version": "0.1.0",
+  "description": "A procedurally-generated terminal bonsai tree generator, built with Ink (React for the terminal). A TypeScript rewrite of cbonsai.",
+  "type": "module",
+  "bin": {
+    "bonsai": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx src/cli.tsx",
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.tsx"
+  },
+  "keywords": [
+    "bonsai",
+    "tree",
+    "terminal",
+    "tui",
+    "ink",
+    "ascii-art",
+    "cli"
+  ],
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@inkjs/ui": "^2.0.0",
+    "chalk": "^5.6.2",
+    "ink": "^7.0.6",
+    "meow": "^14.1.0",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "ink-testing-library": "^4.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
