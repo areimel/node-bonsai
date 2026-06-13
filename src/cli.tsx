@@ -8,6 +8,12 @@ import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
 import { flagsToConfig } from './config.js';
+import { runEngine } from './engine/index.js';
+import { resolveSeed } from './engine/rng.js';
+import { foldSteps } from './render/fold.js';
+import { gridToString } from './render/canvas.js';
+import { makeColorizer } from './render/colors.js';
+import { readSaveFile, writeSaveFile } from './engine/saveFile.js';
 
 const cli = meow(
   `
@@ -60,5 +66,32 @@ const cli = meow(
   },
 );
 
-const config = flagsToConfig(cli.flags);
+let config = flagsToConfig(cli.flags);
+
+// --load: restore the saved seed (the tree is replayed deterministically from it)
+if (config.load) {
+  const { seed } = readSaveFile(config.load);
+  config = { ...config, seed };
+}
+
+// Resolve 0 -> a concrete clock seed once, so --print, --save, and the
+// interactive render all agree on the same tree.
+config = { ...config, seed: resolveSeed(config.seed) };
+
+const size = {
+  width: process.stdout.columns || 80,
+  height: process.stdout.rows || 24,
+};
+
+// --print and/or --save run the engine once (no Ink) and exit/continue.
+if (config.print || config.save) {
+  const result = runEngine(config, size);
+  if (config.save) writeSaveFile(config.save, result.seed, result.branchCount);
+  if (config.print) {
+    const grid = foldSteps(result.steps, result.width, result.height);
+    console.log(gridToString(grid, makeColorizer(config.colors)));
+    process.exit(0);
+  }
+}
+
 render(<App config={config} />);
