@@ -472,6 +472,13 @@ spawn-decision rolls all consume from the same sequence. The tree is therefore
 **fully deterministic** given the same `seed`, `lifeStart`, `multiplier`, and
 `leaves` list.
 
+> **node-bonsai note:** the TypeScript port keeps this single-stream, fixed
+> call-order property (its determinism guarantee) but **deliberately does not
+> reproduce glibc's `rand()` byte-for-byte.** It uses a mulberry32 PRNG seeded
+> from `--seed` (`src/engine/rng.ts`). A given seed yields the same tree across
+> node-bonsai runs and is visually equivalent to the original, but is **not** the
+> same tree a given seed produces under the C version.
+
 ### 7.2 Save format
 
 `cbonsai.c:89–101`
