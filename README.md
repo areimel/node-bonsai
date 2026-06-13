@@ -2,7 +2,7 @@
 
 A procedurally-generated **terminal bonsai tree** generator — per-character-colored ASCII art that grows in your terminal. A TypeScript rewrite of [cbonsai](./original-cbonsai/), built with [Ink](https://github.com/vadimdemedes/ink) (React for the terminal).
 
-> **Status: early scaffold.** The CLI, config, and rendering pipeline are in place; the growth engine port is in progress (`src/engine/` are typed stubs). Running it today shows a placeholder sapling.
+> **Status: working.** The growth engine is ported from the original cbonsai — `npm run dev` grows a full per-character-colored bonsai above an ASCII pot. Static, `--live` animation, `--print`, `--infinite`/`--screensaver`, `--message`, and `--save`/`--load` are all wired up.
 
 ## Quick start
 
