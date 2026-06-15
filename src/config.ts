@@ -47,6 +47,22 @@ export const DEFAULTS = {
   colors: [2, 3, 10, 11] as [number, number, number, number],
 };
 
+/** Names of the built-in color themes selectable via `--theme`. */
+export type ThemeName = 'green' | 'cherry' | 'maple' | 'wisteria';
+
+/**
+ * Named color themes: each resolves to the same four index roles as `--colors`
+ * ([leafDark, woodDark, leafBright, woodBright]). The new themes share a natural
+ * brown trunk and only re-color the foliage. `text` stays hardcoded (colors.ts).
+ * This is a divergence from cbonsai (which has no themes) — see README.md.
+ */
+export const THEMES: Record<ThemeName, [number, number, number, number]> = {
+  green: DEFAULTS.colors, // unchanged default — cbonsai parity
+  cherry: [175, 94, 218, 130], // Cherry Blossom Pink: rose + light pink, brown trunk
+  maple: [124, 94, 202, 130], // Maple Red: dark red + orange-red, brown trunk
+  wisteria: [97, 94, 183, 130], // Wisteria Purple: muted purple + lavender, brown trunk
+};
+
 /** Raw flags as produced by meow (all optional; booleans default to false). */
 export interface CliFlags {
   live?: boolean;
@@ -58,6 +74,7 @@ export interface CliFlags {
   base?: number;
   leaf?: string;
   colors?: string;
+  theme?: string;
   multiplier?: number;
   life?: number;
   print?: boolean;
@@ -84,6 +101,23 @@ function parseColors(input?: string): [number, number, number, number] {
   return parts as [number, number, number, number];
 }
 
+/**
+ * Resolve the four color indices: an explicit `--colors` list wins; otherwise a
+ * named `--theme` is looked up; otherwise the default (green) palette is used.
+ */
+function resolveColors(flags: CliFlags): [number, number, number, number] {
+  if (flags.colors) return parseColors(flags.colors);
+  if (flags.theme) {
+    const theme = flags.theme.trim().toLowerCase();
+    if (!(theme in THEMES)) {
+      const names = Object.keys(THEMES).join(', ');
+      throw new Error(`Invalid --theme "${flags.theme}": expected one of ${names}`);
+    }
+    return [...THEMES[theme as ThemeName]] as [number, number, number, number];
+  }
+  return [...DEFAULTS.colors] as [number, number, number, number];
+}
+
 /** Resolve raw CLI flags into a complete `Config`, applying defaults. */
 export function flagsToConfig(flags: CliFlags = {}): Config {
   const screensaver = flags.screensaver ?? false;
@@ -102,7 +136,7 @@ export function flagsToConfig(flags: CliFlags = {}): Config {
     timeWait: flags.wait ?? DEFAULTS.timeWait,
     message: flags.message,
     leaves: parseLeaves(flags.leaf),
-    colors: parseColors(flags.colors),
+    colors: resolveColors(flags),
     save: flags.save,
     load: flags.load,
   };

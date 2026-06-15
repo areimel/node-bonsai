@@ -30,6 +30,7 @@ Flag parity with the original cbonsai:
 | `-b` | `--base <int>` | Base art (0 none, 1 wide, 2 narrow) | 1 |
 | `-c` | `--leaf <list>` | Comma-separated leaf strings | `&` |
 | `-k` | `--colors <list>` | leafDark,woodDark,leafBright,woodBright | 2,3,10,11 |
+| `-T` | `--theme <name>` | Named color theme (see below) † | green |
 | `-M` | `--multiplier <n>` | Branch multiplier (0–20) | 5 |
 | `-L` | `--life <n>` | Life; higher = more growth (0–200) | 32 |
 | `-p` | `--print` | Print the tree to stdout when finished | off |
@@ -37,6 +38,29 @@ Flag parity with the original cbonsai:
 | `-W` | `--save <file>` | Save progress | — |
 | `-C` | `--load <file>` | Load progress | — |
 | `-v` | `--verbose` | Increase verbosity | off |
+
+### Color themes
+
+> † `--theme` is an intentional divergence from the original cbonsai, which has
+> no named themes (only the raw `--colors` indices). It is a convenience layer
+> over the same four color roles.
+
+Pick a ready-made palette with `--theme <name>`. Each theme maps to the same
+four ANSI-256 indices as `--colors` (`leafDark,woodDark,leafBright,woodBright`);
+the new themes keep a natural brown trunk and only re-color the foliage. An
+explicit `--colors` always overrides `--theme`.
+
+| Theme | Look | Equivalent `--colors` |
+|-------|------|-----------------------|
+| `green` | Classic green/yellow (cbonsai default) | `2,3,10,11` |
+| `cherry` | Cherry Blossom Pink — rose + light pink, brown trunk | `175,94,218,130` |
+| `maple` | Maple Red — dark red + orange-red, brown trunk | `124,94,202,130` |
+| `wisteria` | Wisteria Purple — muted purple + lavender, brown trunk | `97,94,183,130` |
+
+```bash
+bonsai --theme cherry
+bonsai -T wisteria --live
+```
 
 ## Project layout
 
