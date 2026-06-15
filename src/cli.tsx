@@ -30,6 +30,7 @@ const cli = meow(
     -b, --base <int>      Base art (0 none, 1 wide, 2 narrow)  [default: 1]
     -c, --leaf <list>     Comma-separated leaf strings         [default: &]
     -k, --colors <list>   leafDark,woodDark,leafBright,woodBright [default: 2,3,10,11]
+    -T, --theme <name>    green | cherry | maple | wisteria      [default: green]
     -M, --multiplier <n>  Branch multiplier (0-20)             [default: 5]
     -L, --life <n>        Life; higher = more growth (0-200)   [default: 32]
     -p, --print           Print the tree to stdout when finished
@@ -55,6 +56,7 @@ const cli = meow(
       base: { type: 'number', shortFlag: 'b' },
       leaf: { type: 'string', shortFlag: 'c' },
       colors: { type: 'string', shortFlag: 'k' },
+      theme: { type: 'string', shortFlag: 'T' },
       multiplier: { type: 'number', shortFlag: 'M' },
       life: { type: 'number', shortFlag: 'L' },
       print: { type: 'boolean', shortFlag: 'p' },
