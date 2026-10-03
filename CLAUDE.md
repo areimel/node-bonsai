@@ -1,55 +1,66 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 ## What this is
 
-Despite the directory name `node-bonsai`, this is **cbonsai** — a terminal bonsai tree generator written in C using `ncursesw`. There is no Node.js here. The entire program lives in a single file, `cbonsai.c` (~1100 lines).
+**node-bonsai** is a terminal bonsai-tree generator: procedurally-generated, per-character-colored ASCII art that grows in your terminal. It is a TypeScript rewrite of **cbonsai** (originally ~1100 lines of C/ncurses), built on **Ink** (React for the terminal).
 
-## Build & install
+The original C project is preserved verbatim under `original-cbonsai/` for reference. Two derived specs live at the repo root and are the source of truth when porting behavior:
+
+- `STYLEGUIDE.md` — every glyph, color, and default the original uses.
+- `ALGORITHM.md` — the extracted growth algorithm as a language-agnostic spec.
+
+When porting, treat those two docs (and `original-cbonsai/cbonsai.c`) as canonical.
+
+## Stack & tooling
+
+- Node.js (ESM, `"type": "module"`) + TypeScript (strict, `NodeNext` modules).
+- **Ink 7** + React 19 for terminal rendering; **meow** for CLI parsing; **chalk** for color.
+- `@inkjs/ui` is installed and reserved for later interactive chrome (menus/status); not used yet.
+- npm for installs, **tsx** for dev runs, **tsc** for type-check/build.
+
+**ESM note:** because modules are `NodeNext`, intra-project imports must use explicit `.js` extensions (e.g. `import { Grid } from './render/canvas.js'`), even though the source files are `.ts`/`.tsx`.
+
+## Build & run
 
 ```bash
-make                  # builds the `cbonsai` binary (also tries to build the man page via scdoc)
-make clean            # removes cbonsai and cbonsai.6
-make install          # installs to /usr/local (binary, man page, bash completion)
-make install PREFIX=~/.local   # user-local install
+npm install
+npm run dev        # tsx src/cli.tsx — run from source
+npm run build      # tsc -> dist/
+npm start          # node dist/cli.js
+npm test           # node --import tsx --test
+npm run typecheck  # tsc --noEmit
 ```
 
-Build dependencies: `ncursesw`/`panelw` (resolved via `pkg-config`; falls back to `-lncursesw -ltinfo -lpanelw`). `scdoc` is optional — without it the man page is skipped with a warning, but the binary still builds. The compiler is invoked with strict warnings (`-Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -pedantic`); keep new code warning-clean.
-
-Note: this is a POSIX/ncurses program. It does not build natively on Windows (the working directory is Windows, but the toolchain assumes a Unix-like environment — WSL, Linux, or macOS).
-
-There is no test suite. Verify changes by running the binary, e.g. `./cbonsai -l` (live growth) or `./cbonsai -p -s 42` (deterministic static output via fixed seed).
-
-## Source layout
-
-- `cbonsai.c` — all program logic
-- `cbonsai.scd` — scdoc source for the man page (`cbonsai.6`); keep in sync with `printHelp()` and the option parser when adding/changing flags
-- `completions/bash/cbonsai.bash` — bash completion; update when adding/changing flags
-- `Makefile`, `LICENSE`, `README.md`
-
-When you add or rename a CLI option, **four places must stay consistent**: `getopt_long` parsing in `main()`, the `long_options[]` table, `printHelp()`, `cbonsai.scd`, and the bash completion file.
+Press `q` to quit the running app.
 
 ## Architecture
 
-The program is organized around three structs threaded through nearly every function (see top of `cbonsai.c`):
+Ink is **flexbox-based, not a 2D canvas** — there is no per-cell absolute grid. The bonsai is therefore modeled as a `Grid` of colored cells and **serialized to a single multi-line string** (with chalk color codes baked in) rendered inside one `<Text>`. Re-render by updating state.
 
-- `struct config` — all user options plus runtime state (seed, `targetBranchCount` for save/load).
-- `struct ncursesObjects` — the four ncurses `WINDOW`s and their `PANEL`s: base, tree, message border, message. Panels are layered; `update_panels()` + `doupdate()` composites them.
-- `struct counters` — live branch/shoot counts during a single tree's growth.
+Source layout (`src/`):
 
-**Tree generation is recursive.** `growTree()` seeds one `branch()` call for the trunk. `branch()` walks a life counter down to 0; at each step it calls `setDeltas()` (dice-roll-based dx/dy per `branchType`) and `chooseString()` (which characters to draw), then recursively spawns child `branch()` calls for shoots, dying branches (leaves), and occasional new trunks. The `enum branchType {trunk, shootLeft, shootRight, dying, dead}` drives both movement and rendering. Growth tuning constants (life, multiplier, the dice thresholds in `setDeltas`) are hand-tuned to look best at the **default size** — large trees look less bonsai-like by design.
+- `cli.tsx` — shebang entry; meow flag parsing (parity with the original flags) → `render(<App/>)`.
+- `config.ts` — `Config` type, `DEFAULTS` (single source of defaults), `flagsToConfig()`.
+- `app.tsx` — Ink root component; `useInput` quit-on-`q`; renders the canvas string.
+- `render/canvas.ts` — `Grid` cell model + `gridToString()` (the one renderer all modes share).
+- `render/colors.ts` — the five color roles → chalk mapping (the one place color logic lives).
+- `engine/` — growth algorithm port (`grow.ts`, `setDeltas.ts`, `chooseString.ts`). Currently **typed stubs**; implementation is tracked for a later session (see `ALGORITHM.md`).
 
-**Two render paths:**
-- ncurses live/interactive: draws into `treeWin`, composites panels. `--live` calls `updateScreen()` (with `nanosleep`) after each step.
-- `--print` (`printstdscr()`): after growth, overlays all windows onto `stdscr`, then walks every cell reading `cchar_t`, converting ncurses color pairs to raw ANSI escape codes printed to stdout — so the finished tree survives in scrollback after the program exits.
+## DRY mode (always on)
 
-**Save/load** (`-W`/`-C`, and `-S` screensaver mode): only the seed and branch count are persisted (`saveToFile`/`loadFromFile`), not the full tree. Loading replays growth deterministically from the seed up to the saved branch count, skipping screen updates until `targetBranchCount` is reached. Default cache path follows XDG (`createDefaultCachePath()`): `$XDG_CACHE_HOME/cbonsai` → `$HOME/.cache/cbonsai` → `./cbonsai`.
+Work in DRY mode at all times:
 
-**Lifecycle:** `main()` parses args → optionally loads from file → seeds `srand` → `do/while` loop of `init()` (ncurses setup, color pairs, windows, message) + `growTree()`, repeating while `--infinite`. Exit goes through `finish()` (tears down ncurses, optionally saves) and `quit()` (frees windows/panels/allocated paths, `exit`).
+- Reuse existing components/utilities before writing new ones.
+- If an element is repeated **3 or more times**, factor it into a single central reusable module.
+- Goal: fewer components, fewer lines of code, consistent styling, easier maintenance.
+
+Concretely: all rendering goes through `render/canvas.ts`; all color decisions go through `render/colors.ts`; all defaults live in `config.ts`. Add new shared logic to these central modules rather than duplicating it.
 
 ## Conventions
 
-- Indentation is **tabs**.
-- Memory: `chooseString()` mallocs a per-branch string the caller frees each step; `saveFile`/`loadFile` are heap-allocated and freed in `quit()`. Match this manual-free discipline.
-- Color pairs 1–4 are dark-leaf / dark-wood / light-leaf / light-wood (configurable via `-k`), pair 5 is text. Terminals with `<256` colors fall back to 8-color mode (`init()`).
+- TypeScript strict mode; keep the build type-clean (`npm run typecheck`).
+- Respect the module boundaries above — don't reach around the central renderer/color/config modules.
+- Keep parity with the original's CLI flags and visual output unless intentionally diverging; note any divergence in `README.md`.
+- When adding/changing a CLI flag, keep these in sync: the meow `flags` table and help text in `cli.tsx`, `CliFlags`/`flagsToConfig` in `config.ts`, and the flag table in `README.md`.
