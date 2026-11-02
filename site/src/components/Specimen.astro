@@ -4,6 +4,7 @@ import { flagsToCommand } from '../../../src/command.js';
 import type { Example } from '../data/examples';
 import { renderTreeHtml } from '../lib/renderTree';
 import { url } from '../lib/url';
+import { flagsToQuery } from '../playground/query';
 
 interface Props {
   example: Example;
@@ -22,12 +23,7 @@ const tree = rows.slice(Math.max(first - 1, 0)).join('\n');
 const command = flagsToCommand(flags);
 const piped = `${flagsToCommand({ ...flags, print: true })} | cat`;
 
-// Same long flag names the Home page reads (?seed=42&theme=cherry). The theme is always
-// spelled out, because Home starts from a cherry tree when the query leaves it out.
-const query = new URLSearchParams(
-  Object.entries({ theme: 'green', ...flags }).map(([key, value]) => [key, String(value)]),
-).toString();
-const tryIt = url(`?${query}`);
+const tryIt = url(flagsToQuery(flags));
 
 const flip = index % 2 === 1;
 const description = `${title}, grown from seed ${flags.seed}. The tree is drawn with text characters.`;
@@ -88,7 +84,7 @@ const description = `${title}, grown from seed ${flags.seed}. The tree is drawn 
   }
   .caption { min-width: 0; }
   .caption h2 { font-size: var(--step-2); margin: 0 0 var(--space-xs); }
-  .seed { color: var(--moss); font-family: var(--font-mono); font-size: var(--step--1); }
+  .seed { color: var(--moss); font-size: var(--step--1); }
   details { margin: var(--space-s) 0 var(--space-xs); max-width: var(--measure); }
   summary { cursor: pointer; color: var(--stamp); }
   details .plate { margin-top: var(--space-xs); }

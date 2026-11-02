@@ -79,6 +79,6 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
   .top nav a:hover { text-decoration: underline; }
   .top nav a[aria-current='page'] { color: var(--stamp); text-decoration: underline; text-underline-offset: 0.3em; }
   .sheet { padding-block: var(--space-l) var(--space-xl); min-height: 60vh; }
-  .foot { padding-block: var(--space-l) var(--space-xl); border-top: 1px solid var(--moss); margin-top: var(--space-xl); }
+  .foot { max-width: none; padding-block: var(--space-l) var(--space-xl); border-top: 1px solid var(--moss); margin-top: var(--space-xl); }
   .foot p { color: var(--moss); font-size: var(--step--1); }
 </style>

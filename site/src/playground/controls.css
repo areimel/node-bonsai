@@ -1,0 +1,51 @@
+/* Playground controls and terminal-frame extras. Tokens only; --stamp marks focus and active state. */
+.controls { display: flex; flex-direction: column; gap: var(--space-s); }
+.field { border: 0; margin: 0; padding: 0; min-width: 0; }
+.field-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-s); }
+.field label, .field legend, .field-head label { font-weight: 700; padding: 0; }
+.field output { font-size: var(--step--1); color: var(--moss); font-variant-numeric: tabular-nums; }
+.field-hint { margin: var(--space-3xs) 0 0; color: var(--moss); font-size: var(--step--1); line-height: 1.3; }
+.field-error { margin: var(--space-3xs) 0 0; color: var(--stamp); font-size: var(--step--1); }
+
+.controls input[type='text'], .controls input[type='number'], .controls select {
+  width: 100%; min-height: 2.5rem; padding: var(--space-3xs) var(--space-2xs);
+  background: var(--mount); color: var(--pine); border: 1px solid var(--moss); border-radius: 0;
+  font-size: var(--step--1);
+}
+.controls input[aria-invalid='true'] { border-color: var(--stamp); border-width: 2px; }
+
+.radios { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-m); margin-top: var(--space-3xs); }
+.radio, .check { display: inline-flex; align-items: center; gap: var(--space-2xs); font-weight: 400; min-height: 2rem; cursor: pointer; }
+.field .check { font-weight: 700; }
+.radio input, .check input { width: 1.1rem; height: 1.1rem; accent-color: var(--stamp); margin: 0; }
+
+.seed-row { display: flex; align-items: flex-end; gap: var(--space-xs); }
+.seed-row .field { flex: 1; }
+
+.btn {
+  min-height: 2.5rem; padding: var(--space-3xs) var(--space-s); cursor: pointer;
+  background: transparent; color: var(--stamp); border: 1px solid var(--stamp); border-radius: 0;
+}
+.btn:hover { background: var(--stamp); color: var(--mount); }
+.home-play-btn { align-self: center; margin-top: var(--space-s); background: var(--mount); }
+
+.controls details { border-top: 1px solid var(--moss); padding-top: var(--space-xs); }
+.controls summary { cursor: pointer; font-weight: 700; padding-block: var(--space-3xs); }
+.controls summary:hover { color: var(--stamp); }
+.controls details[open] summary { margin-bottom: var(--space-xs); }
+
+/* Sliders: a thin moss track, a stamp-blue thumb. Native element, so keyboard use is free. */
+.controls input[type='range'] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 1.75rem; margin: 0; background: transparent; cursor: pointer;
+}
+.controls input[type='range']::-webkit-slider-runnable-track { height: 2px; background: var(--moss); }
+.controls input[type='range']::-moz-range-track { height: 2px; background: var(--moss); }
+.controls input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 1.1rem; height: 1.1rem; margin-top: calc(-0.55rem + 1px);
+  background: var(--mount); border: 2px solid var(--stamp); border-radius: 50%;
+}
+.controls input[type='range']::-moz-range-thumb {
+  width: 0.9rem; height: 0.9rem; background: var(--mount); border: 2px solid var(--stamp); border-radius: 50%;
+}
+.controls input[type='range']:hover::-webkit-slider-thumb, .controls input[type='range']:active::-webkit-slider-thumb { background: var(--stamp); }
+.controls input[type='range']:hover::-moz-range-thumb, .controls input[type='range']:active::-moz-range-thumb { background: var(--stamp); }
