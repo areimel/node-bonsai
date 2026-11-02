@@ -35,6 +35,19 @@ The themes are `green`, `cherry`, `maple` and `wisteria`.
 
 The extra `--` is required: it passes your options on to the app. Without it, npm keeps them for itself and you may just get a still tree.
 
+## See it in your browser
+
+The website in [`site/`](./site/) runs the same app in a web page, with controls for every setting and nothing to set up in your terminal. To open it on your own computer (this needs Node.js 22.23.4 or newer):
+
+```bash
+npm install
+cd site
+npm install
+npm run dev
+```
+
+Then open the address it prints, usually http://localhost:4321/node-bonsai/.
+
 ## Good to know
 
 Trees from `npm run live` and `npm run screensaver` disappear when you quit. To keep a tree on screen, use `--print`.

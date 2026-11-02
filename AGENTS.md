@@ -4,7 +4,7 @@
 
 `node-bonsai` is a TypeScript/Ink terminal bonsai generator. `src/cli.tsx` handles CLI parsing; `src/app.tsx` and `src/app/` manage interaction and animation. `src/engine/` produces the deterministic growth tape; `src/render/` folds it into a colored grid. Keep defaults and flag conversion in `src/config.ts`.
 
-Tests live in `test/`; compiled output goes to `dist/`. ASCII artwork is defined in source. Preserve `original-cbonsai/` as reference code. Consult `ALGORITHM.md` and `STYLEGUIDE.md` when porting growth behavior, glyphs, colors, or defaults.
+`site/` is the separate website package (Astro plus an `ink-web` terminal bundle) and reuses `src/` directly; see `CLAUDE.md` before changing `src/app.tsx` or the terminal wrapper. Tests live in `test/`; compiled output goes to `dist/`. ASCII artwork is defined in source. Preserve `original-cbonsai/` as reference code. Consult `ALGORITHM.md` and `STYLEGUIDE.md` when porting growth behavior, glyphs, colors, or defaults.
 
 ## Build, Test, and Development Commands
 

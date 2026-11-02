@@ -1,0 +1,9 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import { url } from '../lib/url';
+---
+
+<Sheet title="Page not found" description="This page doesn't exist on the node-bonsai site.">
+  <h1>Page not found</h1>
+  <p>This page doesn't exist. <a href={url()}>Grow a tree on the home page</a> or <a href={url('docs')}>read the docs</a>.</p>
+</Sheet>

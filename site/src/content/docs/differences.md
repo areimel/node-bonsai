@@ -5,16 +5,17 @@ order: 5
 ---
 
 node-bonsai is a rewrite of cbonsai, the original C program. It keeps the
-cbonsai flags, and the growth engine is a port of the original.
+cbonsai flags (plus one new one), and the growth engine is a port of the original.
 
 ## What stays the same
 
-- The flags match cbonsai's flags, and the defaults match.
+- The short flags and defaults match cbonsai's. The one long name that
+  differs is `--colors`, which is `--color` in cbonsai.
 - The original cbonsai also clears its tree on quit. So does node-bonsai.
 
 ## What is different
 
-- **Named themes.** cbonsai has no themes. node-bonsai adds `--theme`, a
+- **Named themes.** cbonsai has no themes. node-bonsai adds `--theme` (short form `-T`), a
   convenience layer over the same four colour roles. See the Themes and
   colours page.
 - **Different trees.** node-bonsai does not reproduce glibc `rand()`. Its trees
@@ -26,4 +27,6 @@ cbonsai flags, and the growth engine is a port of the original.
 
 ## Not done yet
 
+- `--save` and `--load` have no default file. cbonsai picks one in your cache
+  folder.
 - `--load` does not skip ahead. It replays the tree from the seed.
