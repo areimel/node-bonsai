@@ -7,6 +7,7 @@ import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
+import { FLAGS } from './flags.js';
 import { flagsToConfig, swallowedFlagsNotice } from './config.js';
 import { runEngine } from './engine/index.js';
 import { resolveSeed } from './engine/rng.js';
@@ -46,25 +47,7 @@ const cli = meow(
 `,
   {
     importMeta: import.meta,
-    flags: {
-      live: { type: 'boolean', shortFlag: 'l' },
-      time: { type: 'number', shortFlag: 't' },
-      infinite: { type: 'boolean', shortFlag: 'i' },
-      wait: { type: 'number', shortFlag: 'w' },
-      screensaver: { type: 'boolean', shortFlag: 'S' },
-      message: { type: 'string', shortFlag: 'm' },
-      base: { type: 'number', shortFlag: 'b' },
-      leaf: { type: 'string', shortFlag: 'c' },
-      colors: { type: 'string', shortFlag: 'k' },
-      theme: { type: 'string', shortFlag: 'T' },
-      multiplier: { type: 'number', shortFlag: 'M' },
-      life: { type: 'number', shortFlag: 'L' },
-      print: { type: 'boolean', shortFlag: 'p' },
-      seed: { type: 'number', shortFlag: 's' },
-      save: { type: 'string', shortFlag: 'W' },
-      load: { type: 'string', shortFlag: 'C' },
-      verbose: { type: 'boolean', shortFlag: 'v' },
-    },
+    flags: FLAGS,
   },
 );
 
