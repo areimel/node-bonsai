@@ -49,6 +49,12 @@ export const DEFAULTS = {
   colors: [2, 3, 10, 11] as [number, number, number, number],
 };
 
+/**
+ * Highest allowed life. Tree size grows exponentially with it: 100 can run out of
+ * memory. cbonsai documents 200, so this is a divergence (see README-TECHNICAL.md).
+ */
+export const MAX_LIFE = 80;
+
 /** The value of each flag when it's left out, for building commands and links. */
 export const FLAG_DEFAULTS = {
   time: DEFAULTS.timeStep,
@@ -133,6 +139,14 @@ function resolveColors(flags: CliFlags): [number, number, number, number] {
   return [...DEFAULTS.colors] as [number, number, number, number];
 }
 
+/** Validate life, rejecting rather than clamping so a command never grows a different tree. */
+function resolveLife(life: number = DEFAULTS.life): number {
+  if (!(life >= 0 && life <= MAX_LIFE)) {
+    throw new Error(`Invalid --life "${life}": expected 0-${MAX_LIFE}. Larger trees can run out of memory.`);
+  }
+  return life;
+}
+
 /** Resolve raw CLI flags into a complete `Config`, applying defaults. */
 export function flagsToConfig(flags: CliFlags = {}): Config {
   const screensaver = flags.screensaver ?? false;
@@ -143,7 +157,7 @@ export function flagsToConfig(flags: CliFlags = {}): Config {
     screensaver,
     print: flags.print ?? false,
     verbose: flags.verbose ? 1 : 0,
-    life: flags.life ?? DEFAULTS.life,
+    life: resolveLife(flags.life),
     multiplier: flags.multiplier ?? DEFAULTS.multiplier,
     base: flags.base ?? DEFAULTS.base,
     seed: flags.seed ?? 0,

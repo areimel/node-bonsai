@@ -46,7 +46,7 @@ Flag parity with the original cbonsai:
 | `-k` | `--colors <list>` | leafDark,woodDark,leafBright,woodBright | 2,3,10,11 |
 | `-T` | `--theme <name>` | Named color theme (see below) † | green |
 | `-M` | `--multiplier <n>` | Branch multiplier (0–20) | 5 |
-| `-L` | `--life <n>` | Life; higher = more growth (0–200) | 32 |
+| `-L` | `--life <n>` | Life; higher = more growth (0–80) ‡ | 32 |
 | `-p` | `--print` | Print the tree to stdout when finished | off |
 | `-s` | `--seed <int>` | Seed the RNG | clock |
 | `-W` | `--save <file>` | Save progress | — |
@@ -54,6 +54,8 @@ Flag parity with the original cbonsai:
 | `-v` | `--verbose` | Increase verbosity | off |
 
 `--live`, `--infinite` and `--screensaver` draw on the terminal's alternate screen, so your shell is restored on quit and the tree disappears; use `--print` to keep a tree in your scrollback. The original cbonsai also clears its tree on quit.
+
+> ‡ An intentional divergence: cbonsai documents 0–200. Tree size grows exponentially with life, and without a limit `--life 200` ran out of memory at the default multiplier, as did `--life 100` at some low multipliers. Values outside 0–80 now exit with an error (`MAX_LIFE` in `src/config.ts`).
 
 ### Color themes
 
@@ -99,7 +101,7 @@ To publish: set the contact values and form endpoint in `site/src/data/contact.t
 
 ## Known limitations
 
-Tree size grows exponentially with `--life`, and nothing limits it in the CLI. `--life 200` ran out of memory at the default multiplier, as did `--life 100` at some low multipliers. Trees up to about 80 finished within a few seconds in testing. The website caps Life at 80 and sets a step budget (`Config.maxSteps`).
+Near the `--life` limit of 80, a low multiplier can still make a very large tree: the slowest in testing took about 3 seconds to generate. The website also sets a step budget (`Config.maxSteps`), which stops a tree early so it can't freeze the tab.
 
 When the `CI` environment variable is set, Ink runs non-interactively, so the screen stays blank until the app exits. Unset `CI` to see the tree.
 

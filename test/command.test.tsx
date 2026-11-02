@@ -75,7 +75,7 @@ test('round trip: command parses back to the same config', () => {
   const cases: CliFlags[] = [
     {},
     { live: true, infinite: true, theme: 'maple', seed: 7 },
-    { leaf: '&,*', message: 'hello world', life: 90, multiplier: 12, base: 2 },
+    { leaf: '&,*', message: 'hello world', life: 70, multiplier: 12, base: 2 },
     { leaf: '&', message: `it's "quoted" & $HOME`, time: 0.1, wait: 2 },
     { screensaver: true, colors: '10,11,12,13' },
     { leaf: '$,`,\\,!' },

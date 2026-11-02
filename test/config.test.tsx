@@ -4,7 +4,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { flagsToConfig, DEFAULTS, THEMES, type ThemeName } from '../src/config.js';
+import { flagsToConfig, DEFAULTS, MAX_LIFE, THEMES, type ThemeName } from '../src/config.js';
 
 test('no color flags falls back to the default green palette', () => {
   assert.deepEqual(flagsToConfig().colors, DEFAULTS.colors);
@@ -34,4 +34,12 @@ test('resolved colors are a fresh copy, not the shared THEMES tuple', () => {
   const cfg = flagsToConfig({ theme: 'wisteria' });
   assert.notEqual(cfg.colors, THEMES.wisteria, 'should not alias the module-level array');
   assert.deepEqual(cfg.colors, THEMES.wisteria);
+});
+
+test('life is accepted up to the limit and rejected beyond it', () => {
+  assert.equal(flagsToConfig({ life: MAX_LIFE }).life, MAX_LIFE);
+  assert.equal(flagsToConfig({ life: 0 }).life, 0);
+  for (const life of [MAX_LIFE + 1, -1, Number.NaN]) {
+    assert.throws(() => flagsToConfig({ life }), /Invalid --life/);
+  }
 });

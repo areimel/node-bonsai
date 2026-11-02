@@ -3,12 +3,11 @@
  * Browser-safe and free of React and ink, so Astro pages can import it
  * (the Examples page builds its "Try it" links with `flagsToQuery`).
  */
-import { FLAG_DEFAULTS, THEMES, type CliFlags } from '../../../src/config.js';
+import { FLAG_DEFAULTS, MAX_LIFE, THEMES, type CliFlags } from '../../../src/config.js';
 
 /** Slider and field limits, shared by the controls and the query-string clamp. */
 export const RANGES = {
-  // Below the CLI's documented 200: tree size grows exponentially, and 100 can run out of memory.
-  life: { min: 0, max: 80, step: 1 },
+  life: { min: 0, max: MAX_LIFE, step: 1 },
   multiplier: { min: 0, max: 20, step: 1 },
   time: { min: 0.01, max: 0.2, step: 0.01 },
   wait: { min: 0, max: 20, step: 1 },

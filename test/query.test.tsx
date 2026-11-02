@@ -31,7 +31,7 @@ test('flags survive a query round trip', () => {
 
 test('maxSteps stops a runaway tree that would otherwise exhaust memory', () => {
   const budget = 5000;
-  const config = { ...flagsToConfig({ life: 200, seed: 1 }), maxSteps: budget };
+  const config = { ...flagsToConfig({ seed: 1 }), life: 200, maxSteps: budget };
   const { steps } = runEngine(config, { width: 100, height: 40 });
   assert.ok(steps.length < budget * 2, `${steps.length} steps`);
 });

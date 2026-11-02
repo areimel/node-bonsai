@@ -23,7 +23,7 @@ thing.
 | `-k` | `--colors <list>` | 2,3,10,11 | Four colour indices, see Themes |
 | `-T` | `--theme <name>` | green | Theme: green, cherry, maple, wisteria |
 | `-M` | `--multiplier <n>` | 5 | Branch multiplier, 0 to 20 |
-| `-L` | `--life <n>` | 32 | Life; more means more growth, 0 to 200, but above about 80 it can run out of memory |
+| `-L` | `--life <n>` | 32 | Life; more means more growth, 0 to 80 |
 | `-p` | `--print` | off | Print the tree to stdout when finished |
 | `-s` | `--seed <int>` | clock | Seed the random generator |
 | `-W` | `--save <file>` | none | Save progress to a file |

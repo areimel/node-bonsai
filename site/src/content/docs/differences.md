@@ -18,6 +18,9 @@ cbonsai flags (plus one new one), and the growth engine is a port of the origina
 - **Named themes.** cbonsai has no themes. node-bonsai adds `--theme` (short form `-T`), a
   convenience layer over the same four colour roles. See the Themes and
   colours page.
+- **A lower limit on life.** cbonsai documents `--life` up to 200. node-bonsai
+  stops at 80 and shows an error above that, because larger trees can run out
+  of memory.
 - **Different trees.** node-bonsai does not reproduce glibc `rand()`. Its trees
   look like cbonsai's trees, but they are not identical to them.
 - **Ink, not ncurses.** cbonsai is C with ncurses. node-bonsai draws with
