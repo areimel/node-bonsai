@@ -87,7 +87,7 @@ export default function App({ config }: AppProps) {
       Math.max(0, config.timeWait * 1000),
     );
     return () => clearTimeout(id);
-  }, [config.infinite, config.timeWait, done]);
+  }, [config.infinite, config.timeWait, done, result]);
 
   const hint = config.screensaver ? 'Press any key to quit.' : "Press 'q' to quit.";
 
