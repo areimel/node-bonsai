@@ -1,0 +1,128 @@
+---
+interface Props {
+  endpoint: string;
+}
+const { endpoint } = Astro.props;
+const workTypes = ['Freelance', 'Contract', 'Full-time', 'Something else'];
+---
+
+<form class="contact-form" method="POST" action={endpoint} data-contact-form>
+  <div class="field">
+    <label for="cf-name">Name</label>
+    <input id="cf-name" name="name" type="text" required autocomplete="name" />
+  </div>
+
+  <div class="field">
+    <label for="cf-email">Email</label>
+    <input id="cf-email" name="email" type="email" required autocomplete="email" spellcheck="false" />
+  </div>
+
+  <div class="field">
+    <label for="cf-type">Type of work</label>
+    <select id="cf-type" name="type" required>
+      <option value="">Choose one</option>
+      {workTypes.map((type) => <option value={type}>{type}</option>)}
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="cf-message">Message</label>
+    <textarea id="cf-message" name="message" rows="6" required></textarea>
+  </div>
+
+  <!-- Formspree honeypot: hidden from people and assistive tech. Bots tend to fill it in. -->
+  <div class="gotcha" hidden>
+    <label for="cf-gotcha">Leave this field empty</label>
+    <input id="cf-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="actions">
+    <button type="submit" data-submit>Send message</button>
+  </div>
+
+  <p class="form-status" role="status" aria-live="polite" data-status></p>
+</form>
+
+<script>
+  // Progressive enhancement: without JS the browser posts the form normally.
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const status = form?.querySelector<HTMLParagraphElement>('[data-status]');
+  const submit = form?.querySelector<HTMLButtonElement>('[data-submit]');
+
+  form?.addEventListener('submit', async (event) => {
+    if (!form || !status || !submit) return;
+    event.preventDefault();
+    submit.disabled = true;
+    submit.textContent = 'Sending...';
+    status.textContent = '';
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`The form service answered with status ${response.status}.`);
+      }
+      form.reset();
+      status.textContent = 'Message sent. Thank you for getting in touch.';
+      submit.textContent = 'Message sent';
+      return;
+    } catch (error) {
+      const reason =
+        error instanceof TypeError
+          ? 'The connection failed before the message reached the form service.'
+          : error instanceof Error
+            ? error.message
+            : 'Something went wrong.';
+      status.textContent = `Your message was not sent. ${reason} Please use the contact details above instead.`;
+    }
+    submit.disabled = false;
+    submit.textContent = 'Send message';
+  });
+</script>
+
+<style>
+  .contact-form {
+    background: var(--mount);
+    border: 1px solid var(--moss);
+    padding: var(--space-m) var(--space-m) var(--space-l);
+    max-width: var(--measure);
+    text-align: left;
+  }
+  .field { margin-bottom: var(--space-m); }
+  label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: var(--space-3xs);
+  }
+  input, select, textarea {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-2xs) var(--space-xs);
+    background: var(--sheet);
+    border: 1px solid var(--moss);
+    border-radius: 0;
+    color: var(--pine);
+  }
+  textarea { resize: vertical; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--stamp);
+    outline-offset: 2px;
+  }
+  .gotcha { display: none; }
+  .actions { margin-top: var(--space-s); }
+  button {
+    min-height: 2.75rem;
+    padding: var(--space-2xs) var(--space-m);
+    background: var(--stamp);
+    color: var(--mount);
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+  }
+  button:disabled { cursor: progress; opacity: 0.7; }
+  .form-status { margin-top: var(--space-s); }
+  .form-status:empty { display: none; }
+</style>
