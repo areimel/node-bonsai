@@ -13,6 +13,13 @@ npm run dev          # run from source via tsx
 npm run build && npm start
 ```
 
+```bash
+npm run live         # animated growth
+npm run screensaver  # loops new trees, quits on any key
+```
+
+Flags passed through npm need a `--` separator, e.g. `npm run dev -- --live --life 40`. Without it, npm consumes the flag itself, so `npm run dev --live` quietly draws a static tree. The app shows a notice when it detects this for `--live`, `-l`, `--infinite` or `--screensaver`, but `-S` and `-i` can't be detected.
+
 Press `q` to quit.
 
 ## CLI options
@@ -38,6 +45,8 @@ Flag parity with the original cbonsai:
 | `-W` | `--save <file>` | Save progress | — |
 | `-C` | `--load <file>` | Load progress | — |
 | `-v` | `--verbose` | Increase verbosity | off |
+
+`--live`, `--infinite` and `--screensaver` draw on the terminal's alternate screen, so your shell is restored on quit and the tree disappears; use `--print` to keep a tree in your scrollback. The original cbonsai also clears its tree on quit.
 
 ### Color themes
 

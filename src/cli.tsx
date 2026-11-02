@@ -100,4 +100,6 @@ if (config.print || config.save) {
   }
 }
 
-render(<App config={config} notice={notice} />);
+render(<App config={config} notice={notice} />, {
+  alternateScreen: config.live || config.infinite,
+});
