@@ -40,7 +40,9 @@ export function flagsToCommand(flags: CliFlags): string {
     } else if (typeof value === 'number') {
       if (value !== (NUMBER_DEFAULTS[key] ?? NaN)) parts.push(short, String(value));
     } else if (value !== '' && value !== STRING_DEFAULTS[key]) {
-      parts.push(short, shellQuote(value));
+      // Attached, or the parser would read a value like --save=x as a flag of its own.
+      if (value.startsWith('-')) parts.push(`--${key}=${shellQuote(value)}`);
+      else parts.push(short, shellQuote(value));
     }
   }
   return parts.join(' ');

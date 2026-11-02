@@ -85,3 +85,13 @@ test('round trip: command parses back to the same config', () => {
     assert.deepEqual(flagsToConfig(back), flagsToConfig(flags), flagsToCommand(flags));
   }
 });
+
+test('a value that looks like a flag stays a value and cannot set --save', () => {
+  for (const flags of [{ message: '--save=/tmp/evil' }, { leaf: '-p' }, { message: '-W evil' }]) {
+    const argv = shellSplit(flagsToCommand(flags)).slice(1);
+    const parsed = meow('', { importMeta: import.meta, argv, flags: FLAGS }).flags;
+    assert.equal(parsed.save, undefined);
+    assert.equal(parsed.print, false);
+    assert.equal(parsed.message ?? parsed.leaf, flags.message ?? flags.leaf);
+  }
+});
