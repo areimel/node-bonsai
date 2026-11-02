@@ -22,6 +22,8 @@ interface AppProps {
   config: Config;
   /** Optional warning shown before the quit hint. */
   notice?: string;
+  /** False when embedded (the website): keys don't quit and the hint row is hidden. */
+  interactive?: boolean;
 }
 
 /** Current terminal size, re-read on resize so the tree refits. */
@@ -46,7 +48,7 @@ function messageRows(message: string | undefined): number {
   return Math.ceil(message.trim().length / 36) + 2;
 }
 
-export default function App({ config, notice }: AppProps) {
+export default function App({ config, notice, interactive = true }: AppProps) {
   const { exit } = useApp();
   const size = useTermSize();
   const colorize = useMemo(() => makeColorizer(config.colors), [config.colors]);
@@ -54,7 +56,9 @@ export default function App({ config, notice }: AppProps) {
   // each finished tree bumps treeKey, regenerating the next one in infinite mode
   const [treeKey, setTreeKey] = useState(0);
 
-  // reserve rows for the quit hint and any message box so nothing scrolls
+  // reserve rows for the quit hint and any message box so nothing scrolls; the
+  // hint's row stays free when embedded, because output that fills the terminal
+  // takes Ink's full-redraw path and ink-web strips its clear, leaving old trees
   const reserved = 1 + messageRows(config.message);
   const canvasWidth = size.width;
   const canvasHeight = Math.max(1, size.height - reserved);
@@ -79,7 +83,7 @@ export default function App({ config, notice }: AppProps) {
       return;
     }
     if (input === 'q') exit();
-  });
+  }, { isActive: interactive });
 
   // infinite mode: once a tree finishes, wait timeWait then grow the next
   useEffect(() => {
@@ -97,9 +101,11 @@ export default function App({ config, notice }: AppProps) {
     <Box flexDirection="column">
       <Text>{frame}</Text>
       {config.message ? <MessageBox message={config.message} /> : null}
-      <Text dimColor wrap="truncate">
-        {notice ? `${notice} ${hint}` : hint}
-      </Text>
+      {interactive ? (
+        <Text dimColor wrap="truncate">
+          {notice ? `${notice} ${hint}` : hint}
+        </Text>
+      ) : null}
     </Box>
   );
 }
