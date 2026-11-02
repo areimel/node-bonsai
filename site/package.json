@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build:playground": "vite build -c vite.playground.config.ts",
-    "dev": "concurrently -k -n playground,astro \"vite build -c vite.playground.config.ts --watch\" \"astro dev\"",
+    "dev": "concurrently -k -n playground,astro \"vite build -c vite.playground.config.ts --watch\" \"astro dev --ignore-lock\"",
     "build": "npm run build:playground && astro build",
     "preview": "astro preview",
     "typecheck": "astro check",
