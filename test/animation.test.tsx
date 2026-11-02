@@ -128,12 +128,14 @@ test('changing settings after a loop restarts from the seed they show', async ()
   const looping = flagsToConfig({ seed: 42, infinite: true, wait: 0 });
   const next = flagsToConfig({ seed: 42, infinite: true, wait: 100, life: 20 });
   const app = render(<App config={looping} interactive={false} />);
-  await new Promise((r) => setTimeout(r, 100)); // several trees go by
-  app.rerender(<App config={next} interactive={false} />);
-  await new Promise((r) => setTimeout(r, 50));
   const fresh = render(<App config={next} interactive={false} />);
-  await new Promise((r) => setTimeout(r, 50));
-  assert.equal(app.lastFrame(), fresh.lastFrame());
-  app.unmount();
-  fresh.unmount();
+  try {
+    await new Promise((r) => setTimeout(r, 100)); // several trees go by
+    app.rerender(<App config={next} interactive={false} />);
+    await new Promise((r) => setTimeout(r, 50));
+    assert.equal(app.lastFrame(), fresh.lastFrame());
+  } finally {
+    app.unmount();
+    fresh.unmount();
+  }
 });
