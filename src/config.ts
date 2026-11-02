@@ -54,7 +54,7 @@ export type ThemeName = 'green' | 'cherry' | 'maple' | 'wisteria';
  * Named color themes: each resolves to the same four index roles as `--colors`
  * ([leafDark, woodDark, leafBright, woodBright]). The new themes share a natural
  * brown trunk and only re-color the foliage. `text` stays hardcoded (colors.ts).
- * This is a divergence from cbonsai (which has no themes) — see README.md.
+ * This is a divergence from cbonsai (which has no themes) — see README-TECHNICAL.md.
  */
 export const THEMES: Record<ThemeName, [number, number, number, number]> = {
   green: DEFAULTS.colors, // unchanged default — cbonsai parity
