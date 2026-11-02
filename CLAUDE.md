@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code (claude.ai/code) when working in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
 
@@ -29,24 +29,47 @@ npm install
 npm run dev        # tsx src/cli.tsx — run from source
 npm run build      # tsc -> dist/
 npm start          # node dist/cli.js
-npm test           # node --import tsx --test
+npm test           # node --import tsx --test test/*.test.tsx
 npm run typecheck  # tsc --noEmit
+
+# single test file / single test by name
+node --import tsx --test test/engine.test.tsx
+node --import tsx --test --test-name-pattern="deterministic" test/*.test.tsx
 ```
 
-Press `q` to quit the running app.
+Requires Node >= 20. No linter or formatter is configured.
+
+Tests use `node:test` + `node:assert/strict`; Ink components are tested with `ink-testing-library`. Use a fixed `seed` in tests so output is reproducible. `npm test` only matches `test/*.test.tsx`, so name new test files accordingly. `tsconfig.json` includes only `src/`, so `npm run typecheck` does **not** check tests, and `tsx` strips types without checking them.
+
+Press `q` to quit the running app (any key in `--screensaver`).
 
 ## Architecture
 
 Ink is **flexbox-based, not a 2D canvas** — there is no per-cell absolute grid. The bonsai is therefore modeled as a `Grid` of colored cells and **serialized to a single multi-line string** (with chalk color codes baked in) rendered inside one `<Text>`. Re-render by updating state.
 
+### The growth tape (big picture)
+
+The engine runs **once** per tree (and again if the terminal resizes, which restarts the animation) and returns a deterministic `GrowthResult` (`engine/types.ts`): an ordered `Step[]` "tape" of single-cell writes in draw order, plus `tickStops` (frame boundaries for `--live`) and `branchStops`. Every output mode is just a different consumer of that one tape:
+
+- **static** → fold the whole tape onto a `Grid` (`render/fold.ts`) → `gridToString()`.
+- **`--live`** → `app/useGrowthAnimation.ts` reveals a growing prefix, one `tickStop` per `timeStep`, applying only new steps to a persistent Grid.
+- **`--print`** → handled in `cli.tsx` *before* Ink renders: run the engine, fold, `console.log`, exit.
+- **`--save` / `--load`** → `--save` writes `"<seed> <branchCount>"` (`engine/saveFile.ts`) from `cli.tsx`, then continues into the normal render unless `--print` is also set. `--load` restores **only the seed**: other flags aren't persisted and must match to reproduce the tree. `branchCount` is parsed but unused, and nothing consumes `branchStops` yet, so the fast-forward described in `engine/types.ts` isn't implemented.
+- **`--infinite` / `--screensaver`** → `app.tsx` bumps a `treeKey` after `timeWait`, re-running the engine with `seed + treeKey`.
+
+`engine/index.ts` (`runEngine`) is the composition root: draws the pot (`base.ts`) into the bottom rows, grows the tree (`grow.ts`) above it, and concatenates the tapes (pot first, so frame 0 shows the pot).
+
+**Determinism rule:** every random decision draws from the single shared mulberry32 PRNG in `engine/rng.ts` via `randInt`, in a fixed call order that mirrors the C code. Never use `Math.random()`, and don't reorder RNG calls when refactoring — that changes every seeded tree. (We intentionally don't reproduce glibc `rand()`, so trees match the original visually, not byte-for-byte.) `cli.tsx` resolves seed `0` → clock seed once, so all modes agree on the same tree.
+
 Source layout (`src/`):
 
-- `cli.tsx` — shebang entry; meow flag parsing (parity with the original flags) → `render(<App/>)`.
-- `config.ts` — `Config` type, `DEFAULTS` (single source of defaults), `flagsToConfig()`.
-- `app.tsx` — Ink root component; `useInput` quit-on-`q`; renders the canvas string.
+- `cli.tsx` — shebang entry; meow flag parsing → `flagsToConfig` → `--load`/seed resolution → `--print`/`--save` fast path → `render(<App/>)`.
+- `config.ts` — `Config`, `DEFAULTS`, `THEMES`, `flagsToConfig()`; also the `BranchType` and `ColorPair` types.
+- `app.tsx` — Ink root: terminal-size tracking, quit input, infinite loop, `MessageBox` overlay.
 - `render/canvas.ts` — `Grid` cell model + `gridToString()` (the one renderer all modes share).
-- `render/colors.ts` — the five color roles → chalk mapping (the one place color logic lives).
-- `engine/` — growth algorithm port (`grow.ts`, `setDeltas.ts`, `chooseString.ts`). Currently **typed stubs**; implementation is tracked for a later session (see `ALGORITHM.md`).
+- `render/colors.ts` — the five color roles → chalk ANSI-256 (the one place color logic lives).
+- `render/fold.ts` — tape → Grid bridge (`foldSteps`, incremental `applySteps`).
+- `engine/` — port of cbonsai's growth: `grow.ts` (recursive `branch()`), `setDeltas.ts`, `chooseString.ts`, `chooseColor.ts`, `base.ts`. Comments cite `cbonsai.c` line ranges; keep them accurate when editing.
 
 ## DRY mode (always on)
 
