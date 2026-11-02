@@ -1,0 +1,30 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import Specimen from '../components/Specimen.astro';
+import { examples } from '../data/examples';
+---
+
+<Sheet
+  title="Examples"
+  description="Seven bonsai trees grown by node-bonsai, each with the command that makes it."
+>
+  <h1>Trees to copy</h1>
+  <p>
+    Each tree below was grown by the real program, and the command under it is what you type to
+    get one like it. Change any option and you get a different tree.
+  </p>
+  <p class="size-note">
+    Every tree here is drawn at 80 columns by 24 rows. The shape of a tree also depends on the
+    size of your terminal, so the same seed in a bigger or smaller window grows a different tree.
+    To get exactly the tree you see here, use the second command under it, which prints at
+    80 by 24 whatever your window size is.
+  </p>
+
+  <div class="trees">
+    {examples.map((example, index) => <Specimen example={example} index={index} />)}
+  </div>
+</Sheet>
+
+<style>
+  .trees { margin-top: var(--space-xl); }
+</style>
