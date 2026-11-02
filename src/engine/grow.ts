@@ -29,6 +29,7 @@ interface GrowthContext {
   /** Step-prefix length at each branch() entry (for --load fast-forward). */
   branchStops: number[];
   counters: { branches: number; shoots: number; shootCounter: number };
+  maxSteps: number;
 }
 
 /** Display width of a code point — 1 for ASCII, 2 for common wide ranges. */
@@ -74,6 +75,7 @@ function drawGlyph(
 
 /** The recursive walk. Port of cbonsai `branch()` (cbonsai.c:419-513). */
 function branch(ctx: GrowthContext, y: number, x: number, type: BranchType, life: number): void {
+  if (ctx.steps.length >= ctx.maxSteps) return;
   ctx.counters.branches++;
   ctx.branchStops.push(ctx.steps.length);
   let shootCooldown = ctx.multiplier;
@@ -153,6 +155,7 @@ export function growTree(config: Config, width: number, height: number): GrowthR
     branchStops: [],
     // shootCounter seeded pseudo-randomly — the first RNG draw (cbonsai.c:704)
     counters: { branches: 0, shoots: 0, shootCounter: randInt(rng, 0x7fffffff) },
+    maxSteps: config.maxSteps ?? Infinity,
   };
 
   branch(ctx, height - 1, Math.floor(width / 2), 'trunk', config.life);

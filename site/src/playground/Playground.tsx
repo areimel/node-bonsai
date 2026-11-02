@@ -5,14 +5,14 @@ import { flagsToCommand } from '../../../src/command.js';
 import Terminal from './Terminal';
 import Controls from './Controls';
 import { Checkbox } from './fields';
-import { commandFlags, flagsFromQuery } from './query';
+import { MAX_STEPS, commandFlags, flagsFromQuery } from './query';
 
 const COLOURS_ERROR =
   "Those colour numbers don't work, so the last good tree is still showing. Use four numbers from 0 to 255, like 2,3,10,11.";
 
 /** The app always runs live and looping; the screensaver box only changes the printed command. */
 function toConfig(flags: CliFlags): Config {
-  return flagsToConfig({ ...flags, live: true, infinite: true, screensaver: false });
+  return { ...flagsToConfig({ ...flags, live: true, infinite: true, screensaver: false }), maxSteps: MAX_STEPS };
 }
 
 function useDebounced<T>(value: T, ms: number): T {

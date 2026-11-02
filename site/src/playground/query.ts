@@ -7,13 +7,17 @@ import { DEFAULTS, THEMES, flagsToConfig, type CliFlags } from '../../../src/con
 
 /** Slider and field limits, shared by the controls and the query-string clamp. */
 export const RANGES = {
-  life: { min: 0, max: 200, step: 1 },
+  // Below the CLI's documented 200: tree size grows exponentially, and 100 can run out of memory.
+  life: { min: 0, max: 80, step: 1 },
   multiplier: { min: 0, max: 20, step: 1 },
   time: { min: 0.01, max: 0.2, step: 0.01 },
   wait: { min: 0, max: 20, step: 1 },
   base: { min: 0, max: 2, step: 1 },
 } as const;
 export const MAX_TEXT = { leaf: 24, message: 140, colors: 24 } as const;
+
+/** Backstop for rare runaway trees, so a seed can't freeze the tab. */
+export const MAX_STEPS = 200_000;
 
 /** The tree the page starts with (and the one the static HTML shows). */
 export const START_FLAGS: CliFlags = { seed: 42, theme: 'cherry' };
@@ -22,6 +26,9 @@ export const START_FLAGS: CliFlags = { seed: 42, theme: 'cherry' };
 export function commandFlags(flags: CliFlags, screensaver: boolean): CliFlags {
   return screensaver ? { ...flags, screensaver: true } : { ...flags, live: true, infinite: true };
 }
+
+/** Links can carry anything; control characters could reach the terminal or a copied command. */
+const cleanText = (text: string) => text.replace(/[\p{Cc}\u200E\u200F\u202A-\u202E\u2066-\u2069]/gu, '');
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
@@ -47,11 +54,11 @@ export function flagsFromQuery(search: string): { flags: CliFlags; screensaver: 
     flags[name] = n;
   }
   const theme = q.get('theme')?.trim().toLowerCase();
-  if (theme && theme in THEMES) flags.theme = theme;
-  const leaf = q.get('leaf');
-  if (leaf) flags.leaf = leaf.slice(0, MAX_TEXT.leaf);
-  const message = q.get('message');
-  if (message) flags.message = message.slice(0, MAX_TEXT.message);
+  if (theme && Object.hasOwn(THEMES, theme)) flags.theme = theme;
+  const leaf = cleanText(q.get('leaf') ?? '').slice(0, MAX_TEXT.leaf);
+  if (leaf) flags.leaf = leaf;
+  const message = cleanText(q.get('message') ?? '').slice(0, MAX_TEXT.message);
+  if (message) flags.message = message;
   const colors = q.get('colors');
   if (colors) {
     try {

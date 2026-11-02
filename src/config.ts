@@ -34,6 +34,8 @@ export interface Config {
   colors: [number, number, number, number];
   save?: string;
   load?: string;
+  /** Stop adding branches past this many steps. Unset in the CLI; the website sets it. */
+  maxSteps?: number;
 }
 
 /** Default values, mirroring the original cbonsai (STYLEGUIDE.md §6). */
@@ -109,7 +111,7 @@ function resolveColors(flags: CliFlags): [number, number, number, number] {
   if (flags.colors) return parseColors(flags.colors);
   if (flags.theme) {
     const theme = flags.theme.trim().toLowerCase();
-    if (!(theme in THEMES)) {
+    if (!Object.hasOwn(THEMES, theme)) {
       const names = Object.keys(THEMES).join(', ');
       throw new Error(`Invalid --theme "${flags.theme}": expected one of ${names}`);
     }
