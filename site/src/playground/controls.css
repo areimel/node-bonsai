@@ -27,7 +27,7 @@
   background: transparent; color: var(--stamp); border: 1px solid var(--stamp); border-radius: 0;
 }
 .btn:hover { background: var(--stamp); color: var(--mount); }
-.home-play-btn { align-self: center; margin-top: var(--space-s); background: var(--mount); }
+.home-play-btn { position: absolute; left: var(--space-s); bottom: var(--space-s); z-index: 2; background: var(--mount); }
 
 .controls details { border-top: 1px solid var(--moss); padding-top: var(--space-xs); }
 .controls summary { cursor: pointer; font-weight: 700; padding-block: var(--space-3xs); }

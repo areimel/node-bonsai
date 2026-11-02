@@ -21,7 +21,8 @@ const first = rows.findIndex((row) => !isBlank(row));
 const tree = rows.slice(Math.max(first - 1, 0)).join('\n');
 
 const command = flagsToCommand(flags);
-const piped = `${flagsToCommand({ ...flags, print: true })} | cat`;
+// FORCE_COLOR keeps the colours, which chalk otherwise drops when output is piped.
+const piped = `FORCE_COLOR=2 ${flagsToCommand({ ...flags, print: true })} | cat`;
 
 const tryIt = url(flagsToQuery(flags));
 

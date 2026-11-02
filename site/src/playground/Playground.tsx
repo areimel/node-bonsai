@@ -51,10 +51,17 @@ export default function Playground({ staticHtml }: { staticHtml: string }) {
     try { return { config: toConfig(flags) }; } catch { return { config: undefined }; }
   }, [flags]);
   const lastGood = useRef(parsed.config ?? toConfig(initial.flags));
-  if (parsed.config) lastGood.current = parsed.config;
+  const lastGoodFlags = useRef(flags);
+  if (parsed.config) {
+    lastGood.current = parsed.config;
+    lastGoodFlags.current = flags;
+  }
   const config = useDebounced(parsed.config ?? lastGood.current, 150);
 
-  const command = flagsToCommand(commandFlags(flags, screensaver));
+  // Always the command for the tree on screen, even while the colours field is invalid.
+  const command = flagsToCommand(commandFlags(lastGoodFlags.current, screensaver));
+  // Reduced motion: the finished tree for the current settings, with no growth or looping.
+  const stillConfig = useMemo(() => ({ ...config, live: false, infinite: false }), [config]);
   const patch = (p: CliFlags) => setFlags((f) => ({ ...f, ...p }));
 
   return (
@@ -62,14 +69,11 @@ export default function Playground({ staticHtml }: { staticHtml: string }) {
       <div className="home-stage">
         <div className="home-frame">
           <TerminalBoundary html={staticHtml}>
-            {playing ? (
-              <Terminal config={config} label={`A bonsai tree growing in the terminal. Command: ${command}`} />
-            ) : (
-              <>
-                <StaticTree html={staticHtml} />
-                <button type="button" className="btn home-play-btn" onClick={() => setPlaying(true)}>Play</button>
-              </>
-            )}
+            <Terminal
+              config={playing ? config : stillConfig}
+              label={`A bonsai tree ${playing ? 'growing in the terminal' : 'in the terminal'}. Command: ${command}`}
+            />
+            {!playing && <button type="button" className="btn home-play-btn" onClick={() => setPlaying(true)}>Play</button>}
           </TerminalBoundary>
         </div>
       </div>

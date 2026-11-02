@@ -95,3 +95,8 @@ test('a value that looks like a flag stays a value and cannot set --save', () =>
     assert.equal(parsed.message ?? parsed.leaf, flags.message ?? flags.leaf);
   }
 });
+
+test('default colours are kept when a theme would otherwise override them', () => {
+  assert.equal(flagsToCommand({ theme: 'cherry', colors: '2,3,10,11' }), "bonsai -k 2,3,10,11 -T cherry");
+  assert.equal(flagsToCommand({ colors: '2,3,10,11' }), 'bonsai');
+});

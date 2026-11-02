@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   BASE, FAST, command, expectTextToChange, fgColours, inkCount, maxInk, openHome, screenText, terminal, trackErrors,
 } from './helpers';
@@ -125,13 +125,23 @@ test.describe('Home fallbacks', () => {
 
 test.describe('Reduced motion', () => {
   test.use({ reducedMotion: 'reduce' });
-  test('shows Play, and Play starts the terminal', async ({ page }) => {
-    await page.goto(BASE);
-    await expect(page.locator('.home-tree')).toBeVisible();
-    await expect(terminal(page)).toHaveCount(0);
-    await page.locator('.home-play-btn').click();
+  const rows = (page: Page) => page.locator('.xterm-rows').innerText();
+
+  test('shows a still tree that follows the settings, and Play starts growth', async ({ page }) => {
+    await page.goto(`${BASE}?seed=7&time=0.01&wait=0`);
     await expect(terminal(page)).toHaveAttribute('data-ready', 'true');
     await expect.poll(() => inkCount(page)).toBeGreaterThan(0);
+    const still = await rows(page);
+    await page.waitForTimeout(600);
+    expect(await rows(page)).toBe(still);
+
+    await page.getByLabel('Seed').fill('8');
+    await expect.poll(() => rows(page)).not.toBe(still);
+
+    await page.locator('.home-play-btn').click();
+    await expect(page.locator('.home-play-btn')).toHaveCount(0);
+    const first = await rows(page);
+    await expect.poll(() => rows(page)).not.toBe(first);
   });
 });
 

@@ -49,6 +49,19 @@ export const DEFAULTS = {
   colors: [2, 3, 10, 11] as [number, number, number, number],
 };
 
+/** The value of each flag when it's left out, for building commands and links. */
+export const FLAG_DEFAULTS = {
+  time: DEFAULTS.timeStep,
+  wait: DEFAULTS.timeWait,
+  base: DEFAULTS.base,
+  multiplier: DEFAULTS.multiplier,
+  life: DEFAULTS.life,
+  seed: 0,
+  leaf: DEFAULTS.leaves.join(','),
+  colors: DEFAULTS.colors.join(','),
+  theme: 'green',
+} as const;
+
 /** Names of the built-in color themes selectable via `--theme`. */
 export type ThemeName = 'green' | 'cherry' | 'maple' | 'wisteria';
 

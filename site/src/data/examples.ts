@@ -24,15 +24,15 @@ export const examples: Example[] = [
   },
   {
     id: 'dense-maple',
-    title: 'A crowded red tree with a small pot',
-    flags: { seed: 12, theme: 'maple', base: 1, life: 50, multiplier: 6 },
-    note: 'A higher life (-L) lets branches grow longer, and a higher multiplier (-M) makes more of them split. Together they fill the whole frame. -b 1 picks the small pot.',
+    title: 'A crowded red tree',
+    flags: { seed: 12, theme: 'maple', life: 50, multiplier: 6 },
+    note: 'A higher life (-L) lets branches grow longer, and a higher multiplier (-M) makes more of them split. Together they fill the whole frame.',
   },
   {
     id: 'small-wisteria',
-    title: 'A small purple tree in a round pot',
+    title: 'A small purple tree in a narrow pot',
     flags: { seed: 11, theme: 'wisteria', base: 2, life: 15, multiplier: 2 },
-    note: 'Low life and a low multiplier give a short tree with few branches. -b 2 is the round pot.',
+    note: 'Low life and a low multiplier give a short tree with few branches. -b 2 is the narrow pot.',
   },
   {
     id: 'no-pot',

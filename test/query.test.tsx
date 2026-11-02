@@ -42,3 +42,13 @@ test('maxSteps does not change a tree under budget', () => {
   const b = runEngine({ ...plain, maxSteps: 200_000 }, { width: 80, height: 24 });
   assert.deepEqual(a.steps, b.steps);
 });
+
+test('unknown params still start on the page tree', () => {
+  assert.equal(flagsFromQuery('?utm_source=x').flags.theme, 'cherry');
+});
+
+test('colours from a link must be four plain numbers', () => {
+  assert.equal(flagsFromQuery('?colors=1,2,3,4').flags.colors, '1,2,3,4');
+  assert.equal(flagsFromQuery(`?colors=${encodeURIComponent('1\x1b[2J\u202E,2,3,4')}`).flags.colors, undefined);
+  assert.equal(flagsFromQuery('?colors=1,2,3,999').flags.colors, undefined);
+});

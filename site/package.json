@@ -11,7 +11,7 @@
     "dev": "concurrently -k -n playground,astro \"vite build -c vite.playground.config.ts --watch\" \"astro dev --ignore-lock\"",
     "build": "npm run build:playground && astro build",
     "preview": "astro preview",
-    "typecheck": "astro check",
+    "typecheck": "astro check && tsc -p tsconfig.playground.json",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -31,6 +31,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "concurrently": "^10.0.6",
     "vite": "^8.0.0"
   }

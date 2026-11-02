@@ -3,7 +3,7 @@
  * Browser-safe and free of React and ink, so Astro pages can import it
  * (the Examples page builds its "Try it" links with `flagsToQuery`).
  */
-import { DEFAULTS, THEMES, flagsToConfig, type CliFlags } from '../../../src/config.js';
+import { FLAG_DEFAULTS, THEMES, type CliFlags } from '../../../src/config.js';
 
 /** Slider and field limits, shared by the controls and the query-string clamp. */
 export const RANGES = {
@@ -40,11 +40,12 @@ const NUMBER_PARAMS: Param[] = [
 /**
  * Flags from a query string. Unknown or invalid values are ignored; numbers are
  * clamped. Anything the query leaves out takes the CLI default, so a link means
- * the same as its command; only a bare URL gets the START_FLAGS tree.
+ * the same as its command; a URL with none of these settings gets the START_FLAGS tree.
  */
 export function flagsFromQuery(search: string): { flags: CliFlags; screensaver: boolean } {
   const q = new URLSearchParams(search);
-  const flags: CliFlags = search.replace(/^\?/, '') ? {} : { ...START_FLAGS };
+  const known = [...NUMBER_PARAMS.map(([name]) => name), 'theme', 'leaf', 'message', 'colors'];
+  const flags: CliFlags = known.some((name) => q.has(name)) ? {} : { ...START_FLAGS };
   for (const [name, integer] of NUMBER_PARAMS) {
     const raw = q.get(name);
     if (raw === null || raw.trim() === '' || !Number.isFinite(Number(raw))) continue;
@@ -59,26 +60,17 @@ export function flagsFromQuery(search: string): { flags: CliFlags; screensaver: 
   if (leaf) flags.leaf = leaf;
   const message = cleanText(q.get('message') ?? '').slice(0, MAX_TEXT.message);
   if (message) flags.message = message;
-  const colors = q.get('colors');
-  if (colors) {
-    try {
-      flagsToConfig({ colors: colors.slice(0, MAX_TEXT.colors) });
-      flags.colors = colors.slice(0, MAX_TEXT.colors);
-    } catch { /* invalid colours are ignored */ }
-  }
+  const colors = q.get('colors') ?? '';
+  if (/^\d{1,3}(,\d{1,3}){3}$/.test(colors) && colors.split(',').every((n) => Number(n) <= 255)) flags.colors = colors;
   return { flags, screensaver: q.get('screensaver') === '1' || q.get('screensaver') === 'true' };
 }
 
 /** `?seed=...` for flags that differ from the defaults ('' if none). */
 export function flagsToQuery(flags: CliFlags): string {
   const q = new URLSearchParams();
-  const defaults: Record<string, unknown> = {
-    life: DEFAULTS.life, multiplier: DEFAULTS.multiplier, base: DEFAULTS.base, time: DEFAULTS.timeStep,
-    wait: DEFAULTS.timeWait, theme: 'green', leaf: DEFAULTS.leaves.join(','), seed: 0,
-  };
   for (const name of ['seed', 'theme', 'base', 'life', 'multiplier', 'time', 'wait', 'leaf', 'message', 'colors'] as const) {
     const value = flags[name];
-    if (value !== undefined && value !== '' && value !== defaults[name]) q.set(name, String(value));
+    if (value !== undefined && value !== '' && value !== (FLAG_DEFAULTS as Record<string, unknown>)[name]) q.set(name, String(value));
   }
   if (flags.screensaver) q.set('screensaver', '1');
   const text = q.toString();
