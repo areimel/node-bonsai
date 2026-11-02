@@ -141,3 +141,23 @@ export function flagsToConfig(flags: CliFlags = {}): Config {
     load: flags.load,
   };
 }
+
+/** npm env var -> the flag the user typed, and whether the config shows it active. */
+const NPM_SWALLOWED: [env: string, flag: string, active: (c: Config) => boolean][] = [
+  ['npm_config_live', '--live', (c) => c.live],
+  ['npm_config_long', '-l', (c) => c.live],
+  ['npm_config_infinite', '--infinite', (c) => c.infinite],
+  ['npm_config_screensaver', '--screensaver', (c) => c.screensaver],
+];
+
+/** One-line warning when `npm run` consumed flags meant for the app (needs `--`). */
+export function swallowedFlagsNotice(
+  config: Config,
+  env: Record<string, string | undefined>,
+): string | undefined {
+  const flags = NPM_SWALLOWED.filter(([name, , active]) => env[name] === 'true' && !active(config)).map(
+    ([, flag]) => flag,
+  );
+  if (!flags.length) return undefined;
+  return `npm swallowed ${flags.join(', ')}. Use: npm run dev -- ${flags.join(' ')}`;
+}

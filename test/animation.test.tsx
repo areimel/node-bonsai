@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import App from '../src/app.js';
-import { flagsToConfig } from '../src/config.js';
+import { flagsToConfig, swallowedFlagsNotice } from '../src/config.js';
 
 const ANSI = /\u001b\[[0-9;]*m/g;
 
@@ -75,6 +75,50 @@ test('static + infinite: keeps producing new trees', async () => {
   try {
     const ok = await until(() => new Set(frames).size >= 3, 5000);
     assert.ok(ok, `expected >= 3 distinct frames, got ${new Set(frames).size}`);
+  } finally {
+    unmount();
+  }
+});
+
+test('swallowedFlagsNotice: reports --live swallowed by npm', () => {
+  const msg = swallowedFlagsNotice(flagsToConfig(), { npm_config_live: 'true' });
+  assert.equal(msg, 'npm swallowed --live. Use: npm run dev -- --live');
+});
+
+test('swallowedFlagsNotice: reports -l from npm_config_long', () => {
+  const msg = swallowedFlagsNotice(flagsToConfig(), { npm_config_long: 'true' });
+  assert.ok(msg?.includes('-l'));
+});
+
+test('swallowedFlagsNotice: lists several flags', () => {
+  const msg = swallowedFlagsNotice(flagsToConfig(), {
+    npm_config_live: 'true',
+    npm_config_infinite: 'true',
+  });
+  assert.equal(msg, 'npm swallowed --live, --infinite. Use: npm run dev -- --live --infinite');
+});
+
+test('swallowedFlagsNotice: undefined when the flag is active', () => {
+  assert.equal(
+    swallowedFlagsNotice(flagsToConfig({ live: true }), { npm_config_live: 'true' }),
+    undefined,
+  );
+});
+
+test('swallowedFlagsNotice: undefined for empty env', () => {
+  assert.equal(swallowedFlagsNotice(flagsToConfig(), {}), undefined);
+});
+
+test('swallowedFlagsNotice: ignores unrelated npm settings', () => {
+  assert.equal(swallowedFlagsNotice(flagsToConfig(), { npm_config_save: 'true' }), undefined);
+});
+
+test('App renders the notice on the hint line', () => {
+  const { lastFrame, unmount } = render(
+    <App config={flagsToConfig({ seed: 42 })} notice="npm swallowed --live. Use: npm run dev -- --live" />,
+  );
+  try {
+    assert.ok(lastFrame()?.includes('npm swallowed --live. Use: npm run dev -- --live'));
   } finally {
     unmount();
   }

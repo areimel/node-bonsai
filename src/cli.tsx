@@ -7,7 +7,7 @@ import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
-import { flagsToConfig } from './config.js';
+import { flagsToConfig, swallowedFlagsNotice } from './config.js';
 import { runEngine } from './engine/index.js';
 import { resolveSeed } from './engine/rng.js';
 import { foldSteps } from './render/fold.js';
@@ -80,6 +80,9 @@ if (config.load) {
 // interactive render all agree on the same tree.
 config = { ...config, seed: resolveSeed(config.seed) };
 
+// npm may have eaten flags like --live (no `--` separator); tell the user
+const notice = swallowedFlagsNotice(config, process.env);
+
 const size = {
   width: process.stdout.columns || 80,
   height: process.stdout.rows || 24,
@@ -90,10 +93,11 @@ if (config.print || config.save) {
   const result = runEngine(config, size);
   if (config.save) writeSaveFile(config.save, result.seed, result.branchCount);
   if (config.print) {
+    if (notice) console.error(notice);
     const grid = foldSteps(result.steps, result.width, result.height);
     console.log(gridToString(grid, makeColorizer(config.colors)));
     process.exit(0);
   }
 }
 
-render(<App config={config} />);
+render(<App config={config} notice={notice} />);
