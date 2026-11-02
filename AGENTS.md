@@ -11,7 +11,9 @@ Tests live in `test/`; compiled output goes to `dist/`. ASCII artwork is defined
 Use Node.js 20 or newer and npm.
 
 - `npm ci` — install dependencies from the lockfile.
-- `npm run dev -- --seed 42 --live` — run reproducible animated growth from source; press `q` to quit.
+- `npm run dev` — draw a tree from source; press `q` to quit.
+- `npm run live` / `npm run screensaver` — run the animated modes from source (any key quits the screensaver).
+- `npm run dev -- --seed 42 --live` — run reproducible animated growth; flags need the `--` separator, or npm consumes them.
 - `npm run build` — compile TypeScript into `dist/`.
 - `npm start` — run the compiled CLI after building.
 - `npm run typecheck` — check source types without emitting files.
@@ -30,4 +32,8 @@ Tests use `node:test`, `node:assert/strict`, and `ink-testing-library`. Name fil
 
 ## Commit & Pull Request Guidelines
 
-Git history uses short imperative subjects, such as “Add tests for color theme resolution”; no mandatory prefix convention is evident. Keep commits focused. Pull requests should explain the behavior change and validation commands, link relevant issues, and include terminal captures for visual changes. When changing flags, synchronize CLI help, configuration mapping, and README documentation. Document intentional departures from cbonsai.
+Git history uses short imperative subjects, such as “Add tests for color theme resolution”; no mandatory prefix convention is evident. Keep commits focused. Pull requests should explain the behavior change and validation commands, link relevant issues, and include terminal captures for visual changes. When changing flags, synchronize CLI help, configuration mapping, and the flag table in `README-TECHNICAL.md`. Document intentional departures from cbonsai in `README-TECHNICAL.md`.
+
+## Documentation
+
+Keep both READMEs up to date. `README.md` is the concise guide for non-technical readers; `README-TECHNICAL.md` holds the full technical details. When a change affects how the project is installed, run or used, update both in the same change: `README.md` in plain language with copyable commands, and `README-TECHNICAL.md` with the complete reference. Changes that only affect internals, or the flag table and cbonsai divergences, go in `README-TECHNICAL.md` alone.
