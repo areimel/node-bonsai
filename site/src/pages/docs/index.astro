@@ -1,0 +1,21 @@
+---
+import DocsShell from './_DocsShell.astro';
+import { url } from '../../lib/url';
+import { getDocs } from './_docs';
+
+const docs = await getDocs();
+---
+
+<DocsShell title="Docs" description="Install node-bonsai, run it, and set its options.">
+  <p>
+    node-bonsai grows a bonsai tree in your terminal. These pages show how to
+    install it, run it and set its options.
+  </p>
+  <ul class="docs-list">
+    {docs.map((doc) => (
+      <li>
+        <a href={url(`docs/${doc.id}`)}>{doc.data.title}</a>. {doc.data.description}
+      </li>
+    ))}
+  </ul>
+</DocsShell>
