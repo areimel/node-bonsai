@@ -12,3 +12,9 @@ npm-debug.log*
 # OS / editor junk
 .DS_Store
 Thumbs.db
+
+# site
+site/.astro/
+site/public/playground/
+site/test-results/
+site/playwright-report/
