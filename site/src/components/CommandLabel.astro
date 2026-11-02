@@ -1,0 +1,30 @@
+---
+import '../styles/label.css';
+
+interface Props {
+  command: string;
+  overlap?: boolean;
+}
+const { command, overlap = false } = Astro.props;
+---
+
+<div class:list={['plate', { 'plate-overlap': overlap }]}>
+  <code class="plate-cmd">{command}</code>
+  <button type="button" class="plate-copy" data-copy>Copy</button>
+</div>
+
+<script>
+  // Delegated, so plates rendered later by the React bundle work too.
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-copy]');
+    const text = button?.parentElement?.querySelector('.plate-cmd')?.textContent;
+    if (!button || !text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = 'Copied';
+    } catch {
+      button.textContent = 'Copy failed';
+    }
+    setTimeout(() => (button.textContent = 'Copy'), 1800);
+  });
+</script>
