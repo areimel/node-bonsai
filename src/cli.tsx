@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * CLI entry point: parse flags (parity with the original cbonsai) and render
- * the Ink app. See README.md for the flag table.
+ * the Ink app. See README-TECHNICAL.md for the flag table.
  */
 import React from 'react';
 import { render } from 'ink';

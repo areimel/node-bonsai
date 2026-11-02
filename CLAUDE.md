@@ -26,11 +26,16 @@ When porting, treat those two docs (and `original-cbonsai/cbonsai.c`) as canonic
 
 ```bash
 npm install
-npm run dev        # tsx src/cli.tsx — run from source
-npm run build      # tsc -> dist/
-npm start          # node dist/cli.js
-npm test           # node --import tsx --test test/*.test.tsx
-npm run typecheck  # tsc --noEmit
+npm run dev          # tsx src/cli.tsx — run from source
+npm run live         # dev with --live
+npm run screensaver  # dev with --screensaver
+npm run build        # tsc -> dist/
+npm start            # node dist/cli.js
+npm test             # node --import tsx --test test/*.test.tsx
+npm run typecheck    # tsc --noEmit
+
+# flags need the `--` separator, or npm consumes them
+npm run dev -- --live --life 40
 
 # single test file / single test by name
 node --import tsx --test test/engine.test.tsx
@@ -57,6 +62,8 @@ The engine runs **once** per tree (and again if the terminal resizes, which rest
 - **`--save` / `--load`** → `--save` writes `"<seed> <branchCount>"` (`engine/saveFile.ts`) from `cli.tsx`, then continues into the normal render unless `--print` is also set. `--load` restores **only the seed**: other flags aren't persisted and must match to reproduce the tree. `branchCount` is parsed but unused, and nothing consumes `branchStops` yet, so the fast-forward described in `engine/types.ts` isn't implemented.
 - **`--infinite` / `--screensaver`** → `app.tsx` bumps a `treeKey` after `timeWait`, re-running the engine with `seed + treeKey`.
 
+`--live`, `--infinite` and `--screensaver` render on the terminal's alternate screen (the `render()` options in `cli.tsx`), so the tree disappears on quit.
+
 `engine/index.ts` (`runEngine`) is the composition root: draws the pot (`base.ts`) into the bottom rows, grows the tree (`grow.ts`) above it, and concatenates the tapes (pot first, so frame 0 shows the pot).
 
 **Determinism rule:** every random decision draws from the single shared mulberry32 PRNG in `engine/rng.ts` via `randInt`, in a fixed call order that mirrors the C code. Never use `Math.random()`, and don't reorder RNG calls when refactoring — that changes every seeded tree. (We intentionally don't reproduce glibc `rand()`, so trees match the original visually, not byte-for-byte.) `cli.tsx` resolves seed `0` → clock seed once, so all modes agree on the same tree.
@@ -81,9 +88,13 @@ Work in DRY mode at all times:
 
 Concretely: all rendering goes through `render/canvas.ts`; all color decisions go through `render/colors.ts`; all defaults live in `config.ts`. Add new shared logic to these central modules rather than duplicating it.
 
+## Documentation
+
+Keep both READMEs up to date. `README.md` is the concise guide for non-technical readers; `README-TECHNICAL.md` holds the full technical details. When a change affects how the project is installed, run or used, update both in the same change: `README.md` in plain language with copyable commands, and `README-TECHNICAL.md` with the complete reference. Changes that only affect internals, or the flag table and cbonsai divergences, go in `README-TECHNICAL.md` alone.
+
 ## Conventions
 
 - TypeScript strict mode; keep the build type-clean (`npm run typecheck`).
 - Respect the module boundaries above — don't reach around the central renderer/color/config modules.
-- Keep parity with the original's CLI flags and visual output unless intentionally diverging; note any divergence in `README.md`.
-- When adding/changing a CLI flag, keep these in sync: the meow `flags` table and help text in `cli.tsx`, `CliFlags`/`flagsToConfig` in `config.ts`, and the flag table in `README.md`.
+- Keep parity with the original's CLI flags and visual output unless intentionally diverging; note any divergence in `README-TECHNICAL.md`.
+- When adding/changing a CLI flag, keep these in sync: the meow `flags` table and help text in `cli.tsx`, `CliFlags`/`flagsToConfig` in `config.ts`, and the flag table in `README-TECHNICAL.md`.
