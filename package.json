@@ -14,6 +14,8 @@
   ],
   "scripts": {
     "dev": "tsx src/cli.tsx",
+    "live": "tsx src/cli.tsx --live",
+    "screensaver": "tsx src/cli.tsx --screensaver",
     "build": "tsc",
     "start": "node dist/cli.js",
     "typecheck": "tsc --noEmit",

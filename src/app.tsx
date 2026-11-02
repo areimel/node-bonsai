@@ -20,6 +20,8 @@ import MessageBox from './app/MessageBox.js';
 
 interface AppProps {
   config: Config;
+  /** Optional warning shown before the quit hint. */
+  notice?: string;
 }
 
 /** Current terminal size, re-read on resize so the tree refits. */
@@ -44,7 +46,7 @@ function messageRows(message: string | undefined): number {
   return Math.ceil(message.trim().length / 36) + 2;
 }
 
-export default function App({ config }: AppProps) {
+export default function App({ config, notice }: AppProps) {
   const { exit } = useApp();
   const size = useTermSize();
   const colorize = useMemo(() => makeColorizer(config.colors), [config.colors]);
@@ -87,7 +89,7 @@ export default function App({ config }: AppProps) {
       Math.max(0, config.timeWait * 1000),
     );
     return () => clearTimeout(id);
-  }, [config.infinite, config.timeWait, done]);
+  }, [config.infinite, config.timeWait, done, result]);
 
   const hint = config.screensaver ? 'Press any key to quit.' : "Press 'q' to quit.";
 
@@ -95,7 +97,9 @@ export default function App({ config }: AppProps) {
     <Box flexDirection="column">
       <Text>{frame}</Text>
       {config.message ? <MessageBox message={config.message} /> : null}
-      <Text dimColor>{hint}</Text>
+      <Text dimColor wrap="truncate">
+        {notice ? `${notice} ${hint}` : hint}
+      </Text>
     </Box>
   );
 }
