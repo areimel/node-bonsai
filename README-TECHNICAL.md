@@ -6,7 +6,7 @@ A procedurally-generated **terminal bonsai tree** generator — per-character-co
 
 ## Commands
 
-Requires Node.js 20 or newer.
+Requires Node.js 22 or newer.
 
 ```bash
 npm install

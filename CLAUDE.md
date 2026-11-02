@@ -42,7 +42,7 @@ node --import tsx --test test/engine.test.tsx
 node --import tsx --test --test-name-pattern="deterministic" test/*.test.tsx
 ```
 
-Requires Node >= 20. No linter or formatter is configured.
+Requires Node >= 22. No linter or formatter is configured.
 
 Tests use `node:test` + `node:assert/strict`; Ink components are tested with `ink-testing-library`. Use a fixed `seed` in tests so output is reproducible. `npm test` only matches `test/*.test.tsx`, so name new test files accordingly. `tsconfig.json` includes only `src/`, so `npm run typecheck` does **not** check tests, and `tsx` strips types without checking them.
 

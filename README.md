@@ -4,7 +4,7 @@ Grow a colorful bonsai tree in your terminal. Every tree is randomly generated, 
 
 ## Get started
 
-You'll need [Node.js](https://nodejs.org/) 20 or newer. Then run:
+You'll need [Node.js](https://nodejs.org/) 22 or newer. Then run:
 
 ```bash
 git clone https://github.com/areimel/node-bonsai.git

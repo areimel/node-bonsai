@@ -8,7 +8,7 @@
 
 ## Build, Test, and Development Commands
 
-Use Node.js 20 or newer and npm.
+Use Node.js 22 or newer and npm.
 
 - `npm ci` — install dependencies from the lockfile.
 - `npm run dev` — draw a tree from source; press `q` to quit.
