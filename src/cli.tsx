@@ -7,7 +7,8 @@ import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
 import App from './app.js';
-import { flagsToConfig, swallowedFlagsNotice } from './config.js';
+import { FLAGS } from './flags.js';
+import { MAX_LIFE, flagsToConfig, swallowedFlagsNotice, type Config } from './config.js';
 import { runEngine } from './engine/index.js';
 import { resolveSeed } from './engine/rng.js';
 import { foldSteps } from './render/fold.js';
@@ -32,7 +33,7 @@ const cli = meow(
     -k, --colors <list>   leafDark,woodDark,leafBright,woodBright [default: 2,3,10,11]
     -T, --theme <name>    green | cherry | maple | wisteria      [default: green]
     -M, --multiplier <n>  Branch multiplier (0-20)             [default: 5]
-    -L, --life <n>        Life; higher = more growth (0-200)   [default: 32]
+    -L, --life <n>        Life; higher = more growth (0-${MAX_LIFE})    [default: 32]
     -p, --print           Print the tree to stdout when finished
     -s, --seed <int>      Seed the RNG
     -W, --save <file>     Save progress to file
@@ -46,29 +47,17 @@ const cli = meow(
 `,
   {
     importMeta: import.meta,
-    flags: {
-      live: { type: 'boolean', shortFlag: 'l' },
-      time: { type: 'number', shortFlag: 't' },
-      infinite: { type: 'boolean', shortFlag: 'i' },
-      wait: { type: 'number', shortFlag: 'w' },
-      screensaver: { type: 'boolean', shortFlag: 'S' },
-      message: { type: 'string', shortFlag: 'm' },
-      base: { type: 'number', shortFlag: 'b' },
-      leaf: { type: 'string', shortFlag: 'c' },
-      colors: { type: 'string', shortFlag: 'k' },
-      theme: { type: 'string', shortFlag: 'T' },
-      multiplier: { type: 'number', shortFlag: 'M' },
-      life: { type: 'number', shortFlag: 'L' },
-      print: { type: 'boolean', shortFlag: 'p' },
-      seed: { type: 'number', shortFlag: 's' },
-      save: { type: 'string', shortFlag: 'W' },
-      load: { type: 'string', shortFlag: 'C' },
-      verbose: { type: 'boolean', shortFlag: 'v' },
-    },
+    flags: FLAGS,
   },
 );
 
-let config = flagsToConfig(cli.flags);
+let config: Config;
+try {
+  config = flagsToConfig(cli.flags);
+} catch (error) {
+  console.error((error as Error).message);
+  process.exit(1);
+}
 
 // --load: restore the saved seed (the tree is replayed deterministically from it)
 if (config.load) {

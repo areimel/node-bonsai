@@ -22,6 +22,8 @@ interface AppProps {
   config: Config;
   /** Optional warning shown before the quit hint. */
   notice?: string;
+  /** False when embedded (the website): keys don't quit and the hint row is hidden. */
+  interactive?: boolean;
 }
 
 /** Current terminal size, re-read on resize so the tree refits. */
@@ -46,15 +48,19 @@ function messageRows(message: string | undefined): number {
   return Math.ceil(message.trim().length / 36) + 2;
 }
 
-export default function App({ config, notice }: AppProps) {
+export default function App({ config, notice, interactive = true }: AppProps) {
   const { exit } = useApp();
   const size = useTermSize();
   const colorize = useMemo(() => makeColorizer(config.colors), [config.colors]);
 
   // each finished tree bumps treeKey, regenerating the next one in infinite mode
-  const [treeKey, setTreeKey] = useState(0);
+  // (stored with its config, so a settings change restarts from the seed it shows)
+  const [loop, setLoop] = useState({ config, treeKey: 0 });
+  const treeKey = loop.config === config ? loop.treeKey : 0;
 
-  // reserve rows for the quit hint and any message box so nothing scrolls
+  // reserve rows for the quit hint and any message box so nothing scrolls; the
+  // hint's row stays free when embedded, because output that fills the terminal
+  // takes Ink's full-redraw path and ink-web strips its clear, leaving old trees
   const reserved = 1 + messageRows(config.message);
   const canvasWidth = size.width;
   const canvasHeight = Math.max(1, size.height - reserved);
@@ -79,17 +85,17 @@ export default function App({ config, notice }: AppProps) {
       return;
     }
     if (input === 'q') exit();
-  });
+  }, { isActive: interactive });
 
   // infinite mode: once a tree finishes, wait timeWait then grow the next
   useEffect(() => {
     if (!config.infinite || !done) return;
     const id = setTimeout(
-      () => setTreeKey((k) => k + 1),
+      () => setLoop({ config, treeKey: treeKey + 1 }),
       Math.max(0, config.timeWait * 1000),
     );
     return () => clearTimeout(id);
-  }, [config.infinite, config.timeWait, done, result]);
+  }, [config, treeKey, done, result]);
 
   const hint = config.screensaver ? 'Press any key to quit.' : "Press 'q' to quit.";
 
@@ -97,9 +103,11 @@ export default function App({ config, notice }: AppProps) {
     <Box flexDirection="column">
       <Text>{frame}</Text>
       {config.message ? <MessageBox message={config.message} /> : null}
-      <Text dimColor wrap="truncate">
-        {notice ? `${notice} ${hint}` : hint}
-      </Text>
+      {interactive ? (
+        <Text dimColor wrap="truncate">
+          {notice ? `${notice} ${hint}` : hint}
+        </Text>
+      ) : null}
     </Box>
   );
 }

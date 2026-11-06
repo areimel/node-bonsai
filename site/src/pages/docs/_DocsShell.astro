@@ -1,0 +1,63 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import { url } from '../../lib/url';
+import { getDocs } from './_docs';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Slug of the page being shown, for aria-current in the docs nav. */
+  current?: string;
+}
+const { title, description, current } = Astro.props;
+const docs = await getDocs();
+const index = docs.findIndex((doc) => doc.id === current);
+const next = index >= 0 ? docs[index + 1] : undefined;
+---
+
+<Sheet title={title} description={description}>
+  <div class="docs">
+    <nav class="docs-nav" aria-label="Docs pages">
+      <ul>
+        {docs.map((doc) => (
+          <li>
+            <a href={url(`docs/${doc.id}`)} aria-current={doc.id === current ? 'page' : undefined}>
+              {doc.data.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <h1>{title}</h1>
+    <slot />
+    {next && (
+      <p class="docs-next">
+        Next: <a href={url(`docs/${next.id}`)}>{next.data.title}</a>
+      </p>
+    )}
+  </div>
+</Sheet>
+
+<style is:global>
+  .docs { padding-top: var(--space-s); }
+  .docs h1 { font-size: var(--step-3); }
+  .docs h2 { font-size: var(--step-2); margin-top: var(--space-l); }
+  .docs h3 { font-size: var(--step-1); margin-top: var(--space-m); }
+  .docs-nav { border-bottom: 1px solid var(--moss); padding-bottom: var(--space-xs); margin-bottom: var(--space-l); }
+  .docs-nav ul { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-m); list-style: none; padding: 0; margin: 0; max-width: none; }
+  .docs-nav li + li { margin-top: 0; }
+  .docs-nav a { color: var(--pine); text-decoration: none; }
+  .docs-nav a:hover { text-decoration: underline; }
+  .docs-nav a[aria-current='page'] { color: var(--stamp); text-decoration: underline; text-underline-offset: 0.3em; }
+  /* Tables scroll inside their own box on narrow screens, never the page. */
+  .docs table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: var(--step--1); margin-bottom: var(--space-s); }
+  .docs th, .docs td { text-align: left; vertical-align: top; padding: var(--space-2xs) var(--space-xs); border-bottom: 1px solid var(--moss); }
+  .docs th { font-weight: 700; white-space: nowrap; }
+  .docs td { overflow-wrap: anywhere; }
+  .docs :not(pre) > code { background: var(--mount); padding: 0 0.25em; }
+  .docs pre { background: var(--mount) !important; border: 1px solid var(--moss); padding: var(--space-s); margin-bottom: var(--space-s); }
+  .docs pre, .docs pre span { color: var(--pine) !important; }
+  .docs-list { list-style: none; padding: 0; }
+  .docs-next { margin-top: var(--space-l); border-top: 1px solid var(--moss); padding-top: var(--space-s); }
+  .docs-list li { margin-bottom: var(--space-s); }
+</style>

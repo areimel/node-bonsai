@@ -1,0 +1,104 @@
+@import '@fontsource/alegreya/400.css';
+@import '@fontsource/alegreya/400-italic.css';
+@import '@fontsource/alegreya/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+
+:root {
+  /* colour */
+  --sheet: #dce3da;
+  --mount: #edf0e8;
+  --pine: #1e2b26;
+  --moss: #566b57;
+  --stamp: #2f4a6d;
+
+  /* type */
+  --font-body: 'Alegreya', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --step--1: 0.9375rem;
+  --step-0: 1.1875rem;
+  --step-1: 1.4375rem;
+  --step-2: 1.8125rem;
+  --step-3: clamp(2.1rem, 1.5rem + 2.6vw, 3rem);
+  --step-4: clamp(2.6rem, 1.6rem + 4.2vw, 4.25rem);
+  --measure: 66ch;
+
+  /* spacing */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --gutter: 1rem;
+  --page: 72rem;
+}
+
+@media (min-width: 48rem) {
+  :root { --gutter: 2rem; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--sheet);
+  color: var(--pine);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  line-height: 1.12;
+  margin: 0 0 var(--space-s);
+  text-wrap: balance;
+}
+h1 { font-size: var(--step-4); letter-spacing: -0.01em; }
+h2 { font-size: var(--step-3); margin-top: var(--space-xl); }
+h3 { font-size: var(--step-1); margin-top: var(--space-l); }
+
+p, ul, ol, dl { margin: 0 0 var(--space-s); max-width: var(--measure); }
+li + li { margin-top: var(--space-3xs); }
+
+a {
+  color: var(--stamp);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 3px solid var(--stamp);
+  outline-offset: 2px;
+}
+
+code, kbd, pre { font-family: var(--font-mono); font-size: 0.85em; }
+pre { overflow-x: auto; max-width: 100%; }
+
+small, .note { color: var(--moss); font-size: var(--step--1); }
+
+img, svg, video { max-width: 100%; height: auto; }
+
+input, select, textarea, button { font: inherit; color: inherit; }
+
+hr { border: 0; border-top: 1px solid var(--moss); margin: var(--space-l) 0; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

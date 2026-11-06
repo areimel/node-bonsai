@@ -1,0 +1,105 @@
+---
+import CommandLabel from './CommandLabel.astro';
+import { flagsToCommand } from '../../../src/command.js';
+import type { Example } from '../data/examples';
+import { renderTreeHtml } from '../lib/renderTree';
+import { url } from '../lib/url';
+import { flagsToQuery } from '../playground/query';
+
+interface Props {
+  example: Example;
+  /** Alternates the sheet's width and side so the page does not read as a grid. */
+  index: number;
+}
+const { example, index } = Astro.props;
+const { id, title, flags, note } = example;
+
+// Drop empty rows above the crown. Rows keep all their columns, so nothing shifts sideways.
+const rows = renderTreeHtml(flags).split('\n');
+const isBlank = (row: string) => row.replace(/<[^>]*>/g, '').trim() === '';
+const first = rows.findIndex((row) => !isBlank(row));
+const tree = rows.slice(Math.max(first - 1, 0)).join('\n');
+
+const command = flagsToCommand(flags);
+// FORCE_COLOR keeps the colours, which chalk otherwise drops when output is piped.
+const piped = `FORCE_COLOR=2 ${flagsToCommand({ ...flags, print: true })} | cat`;
+
+const tryIt = url(flagsToQuery(flags));
+
+const flip = index % 2 === 1;
+const description = `${title}, grown from seed ${flags.seed}. The tree is drawn with text characters.`;
+---
+
+<article class:list={['specimen', { flip }, `w${index % 3}`]} id={id} data-example={id} data-seed={flags.seed}>
+  <div class="mount">
+    <div class="scroll" role="region" aria-label={`${title}, scrollable`} tabindex="0">
+      <pre role="img" aria-label={description} set:html={tree} />
+    </div>
+  </div>
+  <div class="caption">
+    <h2>{title}</h2>
+    <p>{note}</p>
+    <p class="seed">Seed {flags.seed}</p>
+    <CommandLabel command={command} />
+    <details>
+      <summary>Get this exact tree</summary>
+      <p>In a terminal, this prints the tree at 80 columns by 24 rows, the same as the picture:</p>
+      <CommandLabel command={piped} />
+    </details>
+    <p class="try"><a href={tryIt}>Try it with these settings</a></p>
+  </div>
+</article>
+
+<script>
+  // Start each wide tree scrolled to its middle, since the crown is rarely at the left edge.
+  document.querySelectorAll<HTMLElement>('.specimen .scroll').forEach((el) => {
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+  });
+</script>
+
+<style>
+  .specimen {
+    display: grid;
+    gap: var(--space-m);
+    margin-bottom: var(--space-2xl);
+    align-items: start;
+  }
+  .mount {
+    background: var(--pine);
+    border: 1px solid var(--moss);
+    min-width: 0;
+    padding: var(--space-s) 0;
+  }
+  .scroll { overflow-x: auto; padding: 0 var(--space-s); }
+  .scroll:focus-visible { outline-offset: -3px; }
+  pre {
+    margin: 0;
+    width: max-content;
+    max-width: none;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    color: var(--mount);
+    white-space: pre;
+  }
+  .caption { min-width: 0; }
+  .caption h2 { font-size: var(--step-2); margin: 0 0 var(--space-xs); }
+  .seed { color: var(--moss); font-size: var(--step--1); }
+  details { margin: var(--space-s) 0 var(--space-xs); max-width: var(--measure); }
+  summary { cursor: pointer; color: var(--stamp); }
+  details .plate { margin-top: var(--space-xs); }
+  .try { margin-top: var(--space-s); }
+
+  @media (min-width: 64rem) {
+    .specimen { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-l); }
+    .specimen.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .specimen.flip .mount { order: 2; }
+    .specimen.w1 .mount { margin-top: var(--space-xl); }
+    .specimen.w2 { width: 88%; }
+    .specimen.w2.flip { margin-left: auto; }
+    .specimen.w1 pre { font-size: 0.75rem; }
+    .caption { padding-top: var(--space-m); }
+    .specimen.flip .caption { padding-top: 0; padding-bottom: var(--space-m); align-self: end; }
+  }
+</style>

@@ -4,7 +4,7 @@ Grow a colorful bonsai tree in your terminal. Every tree is randomly generated, 
 
 ## Get started
 
-You'll need [Node.js](https://nodejs.org/) 20 or newer. Then run:
+You'll need [Node.js](https://nodejs.org/) 22 or newer. Then run:
 
 ```bash
 git clone https://github.com/areimel/node-bonsai.git
@@ -34,6 +34,19 @@ npm run dev -- --print                # print the tree and return to your prompt
 The themes are `green`, `cherry`, `maple` and `wisteria`.
 
 The extra `--` is required: it passes your options on to the app. Without it, npm keeps them for itself and you may just get a still tree.
+
+## See it in your browser
+
+The website in [`site/`](./site/) runs the same app in a web page, with controls for every setting and nothing to set up in your terminal. To open it on your own computer (this needs Node.js 22.23.4 or newer):
+
+```bash
+npm install
+cd site
+npm install
+npm run dev
+```
+
+Then open the address it prints, usually http://localhost:4321/node-bonsai/.
 
 ## Good to know
 

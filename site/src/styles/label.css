@@ -1,0 +1,53 @@
+/*
+ * The typed label plate: a mount-coloured plate showing a command.
+ * Shared by CommandLabel.astro and the React Home page. Markup:
+ *
+ *   <div class="plate">
+ *     <code class="plate-cmd">bonsai -l</code>
+ *     <button type="button" class="plate-copy" data-copy>Copy</button>
+ *   </div>
+ *
+ * Add `plate-overlap` to pull the plate over the corner of the sheet it follows.
+ * The copy script (in CommandLabel.astro) copies the text of the sibling .plate-cmd.
+ */
+.plate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  max-width: 100%;
+  background: var(--mount);
+  color: var(--pine);
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--moss);
+  outline: 1px solid var(--mount);
+  outline-offset: -5px;
+  transform: rotate(-0.4deg);
+}
+.plate-cmd {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  overflow-x: auto;
+  white-space: pre;
+  padding: var(--space-3xs) 0;
+}
+.plate-copy {
+  flex: none;
+  background: transparent;
+  color: var(--stamp);
+  border: 1px solid var(--stamp);
+  padding: var(--space-3xs) var(--space-xs);
+  cursor: pointer;
+}
+.plate-copy:hover { background: var(--stamp); color: var(--mount); }
+
+.plate-overlap {
+  position: relative;
+  z-index: 1;
+  margin: calc(var(--space-m) * -1) calc(var(--space-s) * -1) 0 auto;
+  width: fit-content;
+}
+@media (min-width: 48rem) {
+  .plate-overlap { margin-right: calc(var(--space-l) * -1); }
+}

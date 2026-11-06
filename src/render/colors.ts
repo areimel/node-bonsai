@@ -10,20 +10,27 @@ import type { ColorPair } from '../config.js';
 /** A function that wraps a single character in the right ANSI color codes. */
 export type Colorize = (pair: ColorPair, bold: boolean, char: string) => string;
 
-/**
- * Build a colorizer bound to the four configurable wood/leaf indices.
- *
- * @param colors [leafDark, woodDark, leafBright, woodBright] (0-255)
- */
-export function makeColorizer(colors: [number, number, number, number]): Colorize {
+/** Map each color role to its 256-color index. */
+export function colorIndexes(
+  colors: [number, number, number, number],
+): Record<ColorPair, number> {
   const [leafDark, woodDark, leafBright, woodBright] = colors;
-  const index: Record<ColorPair, number> = {
+  return {
     leafDark,
     woodDark,
     leafBright,
     woodBright,
     text: 8, // matches the 256-color text pair (STYLEGUIDE.md §1.4)
   };
+}
+
+/**
+ * Build a colorizer bound to the four configurable wood/leaf indices.
+ *
+ * @param colors [leafDark, woodDark, leafBright, woodBright] (0-255)
+ */
+export function makeColorizer(colors: [number, number, number, number]): Colorize {
+  const index = colorIndexes(colors);
 
   return (pair, bold, char) => {
     let c: ChalkInstance = chalk.ansi256(index[pair]);

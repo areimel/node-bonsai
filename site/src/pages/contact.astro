@@ -1,0 +1,57 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { contact, visibleContacts } from '../data/contact';
+
+const details = visibleContacts();
+const hasForm = contact.formEndpoint !== '';
+const hrefFor = (key: string, value: string) => (key === 'email' ? `mailto:${value}` : value);
+---
+
+<Sheet title="Contact" description="Get in touch about freelance, contract or full-time work.">
+  <h1>Contact</h1>
+  <p>
+    I take freelance, contract and full-time work. If you have a project or a role in mind,
+    tell me a little about it and how to reach you.
+  </p>
+
+  {
+    details.length > 0 && (
+      <>
+        <h2>Contact details</h2>
+        <ul class="contact-list">
+          {details.map((item) => (
+            <li>
+              <span class="contact-label">{item.label}</span>
+              <a href={hrefFor(item.key, item.value)}>{item.key === 'email' ? item.value : item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  {
+    hasForm && (
+      <>
+        <h2>Send a message</h2>
+        <ContactForm endpoint={contact.formEndpoint} />
+      </>
+    )
+  }
+</Sheet>
+
+<style>
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-s);
+  }
+  .contact-label {
+    display: block;
+    color: var(--moss);
+    font-size: var(--step--1);
+  }
+  .contact-list a { overflow-wrap: anywhere; }
+</style>

@@ -34,6 +34,8 @@ export interface Config {
   colors: [number, number, number, number];
   save?: string;
   load?: string;
+  /** Stop adding branches past this many steps. Unset in the CLI; the website sets it. */
+  maxSteps?: number;
 }
 
 /** Default values, mirroring the original cbonsai (STYLEGUIDE.md §6). */
@@ -46,6 +48,25 @@ export const DEFAULTS = {
   leaves: ['&'] as string[],
   colors: [2, 3, 10, 11] as [number, number, number, number],
 };
+
+/**
+ * Highest allowed life. Tree size grows exponentially with it: 100 can run out of
+ * memory. cbonsai documents 200, so this is a divergence (see README-TECHNICAL.md).
+ */
+export const MAX_LIFE = 80;
+
+/** The value of each flag when it's left out, for building commands and links. */
+export const FLAG_DEFAULTS = {
+  time: DEFAULTS.timeStep,
+  wait: DEFAULTS.timeWait,
+  base: DEFAULTS.base,
+  multiplier: DEFAULTS.multiplier,
+  life: DEFAULTS.life,
+  seed: 0,
+  leaf: DEFAULTS.leaves.join(','),
+  colors: DEFAULTS.colors.join(','),
+  theme: 'green',
+} as const;
 
 /** Names of the built-in color themes selectable via `--theme`. */
 export type ThemeName = 'green' | 'cherry' | 'maple' | 'wisteria';
@@ -109,13 +130,21 @@ function resolveColors(flags: CliFlags): [number, number, number, number] {
   if (flags.colors) return parseColors(flags.colors);
   if (flags.theme) {
     const theme = flags.theme.trim().toLowerCase();
-    if (!(theme in THEMES)) {
+    if (!Object.hasOwn(THEMES, theme)) {
       const names = Object.keys(THEMES).join(', ');
       throw new Error(`Invalid --theme "${flags.theme}": expected one of ${names}`);
     }
     return [...THEMES[theme as ThemeName]] as [number, number, number, number];
   }
   return [...DEFAULTS.colors] as [number, number, number, number];
+}
+
+/** Validate life, rejecting rather than clamping so a command never grows a different tree. */
+function resolveLife(life: number = DEFAULTS.life): number {
+  if (!(life >= 0 && life <= MAX_LIFE)) {
+    throw new Error(`Invalid --life "${life}": expected 0-${MAX_LIFE}. Larger trees can run out of memory.`);
+  }
+  return life;
 }
 
 /** Resolve raw CLI flags into a complete `Config`, applying defaults. */
@@ -128,7 +157,7 @@ export function flagsToConfig(flags: CliFlags = {}): Config {
     screensaver,
     print: flags.print ?? false,
     verbose: flags.verbose ? 1 : 0,
-    life: flags.life ?? DEFAULTS.life,
+    life: resolveLife(flags.life),
     multiplier: flags.multiplier ?? DEFAULTS.multiplier,
     base: flags.base ?? DEFAULTS.base,
     seed: flags.seed ?? 0,

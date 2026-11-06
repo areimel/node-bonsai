@@ -1,0 +1,84 @@
+---
+import '../styles/tokens.css';
+import { url } from '../lib/url';
+import { contact } from '../data/contact';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const fullTitle = title === 'node-bonsai' ? title : `${title} - node-bonsai`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const path = Astro.url.pathname;
+const nav = [
+  { label: 'Examples', href: url('examples') },
+  { label: 'Docs', href: url('docs') },
+  { label: 'Contact', href: url('contact') },
+];
+const isCurrent = (href: string) => path === href || path.startsWith(href);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
+      <a class="home" href={url()} aria-current={path === url() ? 'page' : undefined}>node-bonsai</a>
+      <nav aria-label="Main">
+        <ul>
+          {nav.map((item) => (
+            <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+    <main id="main" class="sheet">
+      <slot />
+    </main>
+    <footer class="foot">
+      <p>
+        <a href={contact.github + '/node-bonsai'}>node-bonsai on GitHub</a>.
+        Free software under the GNU General Public License. Based on cbonsai.
+      </p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  .skip {
+    position: absolute; left: var(--gutter); top: -4rem;
+    background: var(--mount); padding: var(--space-2xs) var(--space-s); z-index: 10;
+  }
+  .skip:focus { top: var(--space-2xs); }
+  .top, .sheet, .foot {
+    width: 100%; max-width: var(--page);
+    padding-inline: var(--gutter);
+    margin-inline: 0 auto;
+  }
+  .top {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: var(--space-xs) var(--space-l);
+    padding-block: var(--space-m) var(--space-s);
+  }
+  .top .home {
+    font-size: var(--step-2); font-weight: 700; color: var(--pine); text-decoration: none;
+    margin-right: auto;
+  }
+  .top ul { list-style: none; display: flex; gap: var(--space-m); margin: 0; padding: 0; max-width: none; }
+  .top li + li { margin-top: 0; }
+  .top nav a { color: var(--pine); text-decoration: none; padding-block: var(--space-2xs); display: inline-block; }
+  .top nav a:hover { text-decoration: underline; }
+  .top nav a[aria-current='page'] { color: var(--stamp); text-decoration: underline; text-underline-offset: 0.3em; }
+  .sheet { padding-block: var(--space-l) var(--space-xl); min-height: 60vh; }
+  .foot { max-width: none; padding-block: var(--space-l) var(--space-xl); border-top: 1px solid var(--moss); margin-top: var(--space-xl); }
+  .foot p { color: var(--moss); font-size: var(--step--1); }
+</style>

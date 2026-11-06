@@ -6,7 +6,7 @@ A procedurally-generated **terminal bonsai tree** generator — per-character-co
 
 ## Commands
 
-Requires Node.js 20 or newer.
+Requires Node.js 22 or newer.
 
 ```bash
 npm install
@@ -46,7 +46,7 @@ Flag parity with the original cbonsai:
 | `-k` | `--colors <list>` | leafDark,woodDark,leafBright,woodBright | 2,3,10,11 |
 | `-T` | `--theme <name>` | Named color theme (see below) † | green |
 | `-M` | `--multiplier <n>` | Branch multiplier (0–20) | 5 |
-| `-L` | `--life <n>` | Life; higher = more growth (0–200) | 32 |
+| `-L` | `--life <n>` | Life; higher = more growth (0–80) ‡ | 32 |
 | `-p` | `--print` | Print the tree to stdout when finished | off |
 | `-s` | `--seed <int>` | Seed the RNG | clock |
 | `-W` | `--save <file>` | Save progress | — |
@@ -54,6 +54,8 @@ Flag parity with the original cbonsai:
 | `-v` | `--verbose` | Increase verbosity | off |
 
 `--live`, `--infinite` and `--screensaver` draw on the terminal's alternate screen, so your shell is restored on quit and the tree disappears; use `--print` to keep a tree in your scrollback. The original cbonsai also clears its tree on quit.
+
+> ‡ An intentional divergence: cbonsai documents 0–200. Tree size grows exponentially with life, and without a limit `--life 200` ran out of memory at the default multiplier, as did `--life 100` at some low multipliers. Values outside 0–80 now exit with an error (`MAX_LIFE` in `src/config.ts`).
 
 ### Color themes
 
@@ -78,7 +80,28 @@ bonsai --theme cherry
 bonsai -T wisteria --live
 ```
 
+## Website
+
+`site/` is a separate package and isn't published with the CLI. It needs Node.js 22.23.4 or newer (Astro's minimum) and an `npm install` in both the repo root and `site/`, because the build imports `src/`.
+
+```bash
+cd site
+npm run dev          # terminal bundle (watch) + astro dev
+npm run build        # terminal bundle, then the static site in dist/
+npm run preview      # serve dist/ under /node-bonsai/
+npm run typecheck    # astro check
+npm run test:e2e     # Playwright; E2E_WEBKIT=1 adds WebKit
+```
+
+Pages are static Astro. The terminal on Home is a separate bundle built by `vite.playground.config.ts` into `public/playground/`, because `ink-web`'s plugin aliases Node builtins globally. That config maps the app's `ink` imports to `ink-web` (Ink 6, bundled) while the CLI stays on Ink 7, and maps `chalk` to the real package because `ink-web`'s shim has no `ansi256`. `App` takes `interactive={false}` when embedded, so keys don't quit it.
+
+Examples are generated at build time with the real engine at 80x24 (`site/src/data/examples.ts`, `site/src/lib/renderTree.ts`), and `test/examples.test.tsx` checks each printed command against the real CLI. The shared flag table is `src/flags.ts`, and `src/command.ts` builds the printed commands.
+
+To publish: set the contact values and form endpoint in `site/src/data/contact.ts`, then set the repo's Pages source to GitHub Actions. `.github/workflows/pages.yml` deploys on pushes to `main`. The contact form stays hidden until `formEndpoint` is set.
+
 ## Known limitations
+
+Near the `--life` limit of 80, a low multiplier can still make a very large tree: the slowest in testing took about 3 seconds to generate. The website also sets a step budget (`Config.maxSteps`), which stops a tree early so it can't freeze the tab.
 
 When the `CI` environment variable is set, Ink runs non-interactively, so the screen stays blank until the app exits. Unset `CI` to see the tree.
 

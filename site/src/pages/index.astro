@@ -1,0 +1,90 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import CommandLabel from '../components/CommandLabel.astro';
+import { url } from '../lib/url';
+import { renderTreeHtml } from '../lib/renderTree';
+import { flagsToCommand } from '../../../src/command';
+import { START_FLAGS, commandFlags } from '../playground/query';
+
+const tree = renderTreeHtml(START_FLAGS);
+const command = flagsToCommand(commandFlags(START_FLAGS, false));
+---
+
+<Sheet title="node-bonsai" description="Grow a bonsai tree in your browser, change how it grows, and copy the command to run it in your own terminal.">
+  <div class="home">
+    <h1>Grow a bonsai tree in your browser</h1>
+    <p class="home-lead">
+      node-bonsai draws a tree one character at a time in your terminal. You can watch it grow here with nothing to install.
+      Change the settings beside the tree, then copy the command underneath to grow one like it on your own computer.
+    </p>
+
+    <div id="playground" class="home-play">
+      <div class="home-stage">
+        <div class="home-frame">
+          <pre class="home-tree" role="img" aria-label="A bonsai tree (a still picture)" set:html={tree} />
+        </div>
+      </div>
+      <div class="home-side"><noscript><p class="note">The settings need JavaScript. The command below works in any terminal.</p></noscript></div>
+      <CommandLabel command={command} overlap />
+    </div>
+    <p class="home-fail" role="status" hidden>
+      The live terminal couldn't load, so the tree shown above is a still picture. The command below it still works in a terminal.
+    </p>
+
+    <p class="home-install">New to this? The <a href={url('docs')}>Docs</a> explain how to install node-bonsai and what each setting does.</p>
+  </div>
+
+  <link rel="stylesheet" href={url('playground/playground.css')} />
+  <script is:inline type="module" src={url('playground/playground.js')} onerror="document.querySelector('.home-fail').hidden=false"></script>
+</Sheet>
+
+<style is:global>
+  .home { --term-h: 24rem; }
+  .home-lead { font-size: var(--step-1); max-width: 60ch; margin-bottom: var(--space-l); }
+  .home-play {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'stage' 'plate' 'side';
+    gap: var(--space-m) var(--space-l);
+    align-items: start;
+  }
+  .home-stage { grid-area: stage; min-width: 0; }
+  .home-side { grid-area: side; min-width: 0; min-height: 30rem; }
+  .home-play > .plate { grid-area: plate; justify-self: end; }
+  .home-frame {
+    position: relative;
+    height: var(--term-h);
+    background: var(--pine);
+    padding: var(--space-s);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  /* paper-tape strips holding the sheet */
+  .home-frame::before, .home-frame::after {
+    content: ''; position: absolute; z-index: 2; pointer-events: none;
+    width: 4.5rem; height: 1.25rem; top: -0.6rem;
+    background: var(--mount); opacity: 0.88; border: 1px solid var(--moss);
+  }
+  .home-frame::before { left: -0.9rem; transform: rotate(-38deg); }
+  .home-frame::after { right: -0.9rem; transform: rotate(38deg); }
+  .home-tree {
+    margin: 0; flex: none; overflow: hidden; align-self: center; max-width: 100%;
+    font-size: 13px; line-height: 1.2; color: var(--mount); background: var(--pine);
+  }
+  .home-term { width: 100%; height: 100%; }
+  .home-fail { max-width: var(--measure); color: var(--stamp); margin-top: var(--space-m); }
+  .home-fail[hidden] { display: none; }
+  .home-install { margin-top: var(--space-xl); }
+
+  @media (min-width: 56rem) {
+    .home { --term-h: 38rem; }
+    .home-play {
+      grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+      grid-template-rows: auto 1fr;
+      grid-template-areas: 'stage side' 'plate side';
+      row-gap: 0;
+    }
+    /* overlap the terminal's lower right corner, staying inside its column */
+    .home-play > .plate { margin-right: var(--space-s); }
+    .home-side { min-height: 44rem; }
+  }
+</style>

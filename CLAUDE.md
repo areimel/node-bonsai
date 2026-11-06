@@ -42,7 +42,7 @@ node --import tsx --test test/engine.test.tsx
 node --import tsx --test --test-name-pattern="deterministic" test/*.test.tsx
 ```
 
-Requires Node >= 20. No linter or formatter is configured.
+Requires Node >= 22. No linter or formatter is configured.
 
 Tests use `node:test` + `node:assert/strict`; Ink components are tested with `ink-testing-library`. Use a fixed `seed` in tests so output is reproducible. `npm test` only matches `test/*.test.tsx`, so name new test files accordingly. `tsconfig.json` includes only `src/`, so `npm run typecheck` does **not** check tests, and `tsx` strips types without checking them.
 
@@ -70,6 +70,7 @@ The engine runs **once** per tree (and again if the terminal resizes, which rest
 
 Source layout (`src/`):
 
+- `flags.ts` — the meow flag table (browser-safe); `command.ts` — flags back to a `bonsai ...` command.
 - `cli.tsx` — shebang entry; meow flag parsing → `flagsToConfig` → `--load`/seed resolution → `--print`/`--save` fast path → `render(<App/>)`.
 - `config.ts` — `Config`, `DEFAULTS`, `THEMES`, `flagsToConfig()`; also the `BranchType` and `ColorPair` types.
 - `app.tsx` — Ink root: terminal-size tracking, quit input, infinite loop, `MessageBox` overlay.
@@ -77,6 +78,16 @@ Source layout (`src/`):
 - `render/colors.ts` — the five color roles → chalk ANSI-256 (the one place color logic lives).
 - `render/fold.ts` — tape → Grid bridge (`foldSteps`, incremental `applySteps`).
 - `engine/` — port of cbonsai's growth: `grow.ts` (recursive `branch()`), `setDeltas.ts`, `chooseString.ts`, `chooseColor.ts`, `base.ts`. Comments cite `cbonsai.c` line ranges; keep them accurate when editing.
+
+## Website (`site/`)
+
+A separate npm package (no workspaces: the CLI needs Ink 7, `ink-web` bundles Ink 6). See `README-TECHNICAL.md` for commands and `docs/superpowers/specs/2026-11-02-microsite-design.md` for why. It reuses `src/` directly, so changes there affect the site. Things that look removable but aren't:
+
+- `App` keeps its hint row reserved when `interactive={false}`: output filling the terminal takes Ink's full-redraw path, and `ink-web` strips the clear, leaving old trees on screen.
+- `site/src/playground/Terminal.tsx` starts `App` only after the font loads and `onReady` fires, and remounts on size change; changing size under a running app garbles output.
+- `src/` must stay browser-safe except `cli.tsx` and `engine/saveFile.ts`.
+- Build every internal link with `site/src/lib/url.ts`, since the site is served under `/node-bonsai/`.
+- Never fill `site/src/data/contact.ts` from git config or guesses; the owner supplies those values.
 
 ## DRY mode (always on)
 
@@ -97,4 +108,4 @@ Keep both READMEs up to date. `README.md` is the concise guide for non-technical
 - TypeScript strict mode; keep the build type-clean (`npm run typecheck`).
 - Respect the module boundaries above — don't reach around the central renderer/color/config modules.
 - Keep parity with the original's CLI flags and visual output unless intentionally diverging; note any divergence in `README-TECHNICAL.md`.
-- When adding/changing a CLI flag, keep these in sync: the meow `flags` table and help text in `cli.tsx`, `CliFlags`/`flagsToConfig` in `config.ts`, and the flag table in `README-TECHNICAL.md`.
+- When adding/changing a CLI flag, keep these in sync: the `FLAGS` table in `flags.ts`, help text in `cli.tsx`, `CliFlags`/`flagsToConfig` in `config.ts`, the defaults in `command.ts`, the flag table in `README-TECHNICAL.md`, and the options page in `site/src/content/docs/`.
