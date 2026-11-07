@@ -97,7 +97,7 @@ Pages are static Astro. The terminal on Home is a separate bundle built by `vite
 
 Examples are generated at build time with the real engine at 80x24 (`site/src/data/examples.ts`, `site/src/lib/renderTree.ts`), and `test/examples.test.tsx` checks each printed command against the real CLI. The shared flag table is `src/flags.ts`, and `src/command.ts` builds the printed commands.
 
-To publish: set the contact values and form endpoint in `site/src/data/contact.ts`, then set the repo's Pages source to GitHub Actions. `.github/workflows/pages.yml` deploys on pushes to `main`. The contact form stays hidden until `formEndpoint` is set.
+To publish: set the contact values and form endpoint in `site/src/data/contact.ts`, then set the repo's Pages source to GitHub Actions. `.github/workflows/pages.yml` deploys on pushes to `main`, to https://areimel.github.io/node-bonsai/. The contact form stays hidden until `formEndpoint` is set.
 
 ## Known limitations
 

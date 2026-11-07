@@ -2,6 +2,8 @@
 
 Grow a colorful bonsai tree in your terminal. Every tree is randomly generated, so each one is different. This is a rewrite of [cbonsai](./original-cbonsai/).
 
+**Try it in your browser:** https://areimel.github.io/node-bonsai/
+
 ## Get started
 
 You'll need [Node.js](https://nodejs.org/) 22 or newer. Then run:
@@ -37,7 +39,9 @@ The extra `--` is required: it passes your options on to the app. Without it, np
 
 ## See it in your browser
 
-The website in [`site/`](./site/) runs the same app in a web page, with controls for every setting and nothing to set up in your terminal. To open it on your own computer (this needs Node.js 22.23.4 or newer):
+Visit **[areimel.github.io/node-bonsai](https://areimel.github.io/node-bonsai/)** to grow trees right in a web page. There's nothing to install. It runs the same app as the terminal version, with controls for every setting, plus example trees and a guide to every option.
+
+The website's code is in [`site/`](./site/). To run it on your own computer (this needs Node.js 22.23.4 or newer):
 
 ```bash
 npm install
